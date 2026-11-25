@@ -1,0 +1,11 @@
+{% load ff %}
+{% comment %}Obligaciones de una compra (pago mensual o cronograma francés). Espera: compra, obligaciones, m.{% endcomment %}
+<div class="table-responsive"><table class="table table-sm mb-0">
+  <thead><tr><th>N°</th><th>Vence</th>{% if compra.modalidad == 'CUOTAS' %}<th class="text-end">Saldo inicial</th>{% endif %}<th class="text-end">Interés</th><th class="text-end">{% if compra.modalidad == 'CUOTAS' %}Amortización{% else %}Capital{% endif %}</th><th class="text-end">{% if compra.modalidad == 'CUOTAS' %}Cuota{% else %}Total{% endif %}</th>{% if compra.modalidad == 'CUOTAS' %}<th class="text-end">Saldo final</th>{% endif %}<th>Estado</th></tr></thead>
+  <tbody>{% for o in obligaciones %}<tr>
+    <td>{{ o.numero }}</td><td>{{ o.vencimiento|date:"d/m/Y" }}</td>
+    {% if compra.modalidad == 'CUOTAS' %}<td class="ff-num">{{ o.saldo_inicial|dinero:m }}</td>{% endif %}
+    <td class="ff-num">{{ o.interes|dinero:m }}</td><td class="ff-num">{{ o.capital|dinero:m }}</td><td class="ff-num fw-semibold">{{ o.total|dinero:m }}</td>
+    {% if compra.modalidad == 'CUOTAS' %}<td class="ff-num">{{ o.saldo_final|dinero:m }}</td>{% endif %}
+    <td>{% if o.estado == 'PAGADA' %}<span class="badge text-bg-success">Pagada {{ o.pagada_en|date:"d/m" }}</span>{% elif o.estado == 'ANULADA' %}<span class="badge text-bg-danger">Anulada</span>{% else %}<span class="badge text-bg-warning">Pendiente</span>{% endif %}</td></tr>{% endfor %}</tbody>
+</table></div>

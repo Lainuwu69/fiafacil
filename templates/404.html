@@ -1,0 +1,10 @@
+{% extends "base_auth.html" %}
+{% block titulo %}No encontrado{% endblock %}
+{% block contenido %}
+  <div class="text-center">
+    <i class="bi bi-search display-4 text-secondary" aria-hidden="true"></i>
+    <h1 class="h4 mt-3">No encontramos lo que buscas</h1>
+    <p class="text-body-secondary">Puede que el registro no exista o que no pertenezca a tu tienda.</p>
+    <a href="{% url 'core:inicio' %}" class="btn btn-primary">Ir a mi inicio</a>
+  </div>
+{% endblock %}

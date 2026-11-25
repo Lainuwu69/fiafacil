@@ -1,0 +1,28 @@
+{% load ff %}
+{% comment %}Campos de condiciones de crédito con TEM y TEA equivalentes calculadas en el servidor (condicion.js).{% endcomment %}
+{% if cond.non_field_errors %}<div class="alert alert-danger">{% for e in cond.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
+<div class="row" data-tasa-grupo="tasa">
+  <div class="col-12"><h3 class="h6 text-uppercase text-body-secondary">Tasa compensatoria</h3></div>
+  <div class="col-md-3">{% campo cond.tasa_tipo data_rol="tipo" %}</div>
+  <div class="col-md-3">{% campo cond.tasa_porcentaje data_rol="porcentaje" %}</div>
+  <div class="col-md-3">{% campo cond.tasa_periodo data_rol="periodo" %}</div>
+  <div class="col-md-3">{% campo cond.tasa_capitalizacion data_rol="capitalizacion" %}</div>
+  <div class="col-12 mb-3"><div class="ff-equivalente small alert alert-light border py-2 mb-0" aria-live="polite">Escribe la tasa para ver su TEM y TEA equivalentes.</div></div>
+</div>
+<div class="row" data-tasa-grupo="mora">
+  <div class="col-12"><h3 class="h6 text-uppercase text-body-secondary">Tasa moratoria (por días de atraso)</h3></div>
+  <div class="col-md-3">{% campo cond.mora_tipo data_rol="tipo" %}</div>
+  <div class="col-md-3">{% campo cond.mora_porcentaje data_rol="porcentaje" %}</div>
+  <div class="col-md-3">{% campo cond.mora_periodo data_rol="periodo" %}</div>
+  <div class="col-md-3">{% campo cond.mora_capitalizacion data_rol="capitalizacion" %}</div>
+  <div class="col-12 mb-3"><div class="ff-equivalente small alert alert-light border py-2 mb-0" aria-live="polite">Escribe la tasa moratoria para ver su equivalente.</div></div>
+</div>
+<div class="row">
+  <div class="col-12"><h3 class="h6 text-uppercase text-body-secondary">Límite y calendario</h3></div>
+  <div class="col-md-4">{% campo cond.limite %}</div>
+  <div class="col-md-4">{% campo cond.plazo_max %}</div>
+  <div class="col-md-4">{% campo cond.vigente_desde %}</div>
+  <div class="col-md-4">{% campo cond.dia_corte %}</div>
+  <div class="col-md-4">{% campo cond.hora_corte %}</div>
+  <div class="col-md-4">{% campo cond.dia_pago %}</div>
+</div>

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Nueva venta al crédito{% endblock %}
+{% block contenido %}
+  <h1 class="h3">Nueva venta al crédito</h1>
+  <p class="text-body-secondary">Elige el cliente y los artículos. A la derecha verás, calculado por el servidor, en qué ciclo cae la compra, cuándo vence, cuánto paga de interés y cómo queda su crédito.</p>
+  {% if not cuentas or not articulos %}
+    <div class="alert alert-warning">Para vender necesitas al menos {% if not cuentas %}<a href="{% url 'clientes:nuevo' %}">un cliente</a>{% endif %}{% if not cuentas and not articulos %} y {% endif %}{% if not articulos %}<a href="{% url 'tiendas:articulo_nuevo' %}">un artículo</a>{% endif %}.</div>
+  {% endif %}
+  <form method="post" id="form-venta" novalidate data-un-envio data-api="{% url 'creditos:api_simular' %}">
+    {% csrf_token %}
+    <input type="hidden" name="clave" value="{{ clave }}">
+    <div class="row g-3">
+      <div class="col-xl-6">
+        <div class="card border-0 shadow-sm"><div class="card-body">
+          <div class="mb-3">
+            <label for="cuenta" class="form-label fw-semibold">Cliente <span class="text-danger">*</span></label>
+            <button type="button" class="btn btn-link p-0 ms-1 ff-ayuda" data-bs-toggle="tooltip" title="Solo aparecen los clientes activos de tu tienda. Cada cuenta tiene una sola moneda."><i class="bi bi-info-circle"></i></button>
+            <select id="cuenta" name="cuenta" class="form-select" required aria-describedby="ayuda-cuenta">
+              <option value="">— Elige el cliente —</option>
+              {% for c in cuentas %}<option value="{{ c.pk }}" {% if c.pk|stringformat:'s' == cuenta_id %}selected{% endif %}>{{ c.codigo }} · {{ c.nombre }} ({{ c.moneda }})</option>{% endfor %}
+            </select>
+            <div id="ayuda-cuenta" class="form-text">Ej.: C001 · Carmen Quispe (PEN).</div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="fecha_compra" class="form-label fw-semibold">Fecha y hora de la compra <span class="text-danger">*</span></label>
+              <button type="button" class="btn btn-link p-0 ms-1 ff-ayuda" data-bs-toggle="tooltip" title="Hora de Lima. Una compra a la hora exacta del corte o después pasa al ciclo siguiente (RN03). Puede ser pasada para registrar fiados del cuaderno, nunca futura."><i class="bi bi-info-circle"></i></button>
+              <input type="datetime-local" id="fecha_compra" name="fecha_compra" class="form-control" step="1" value="{{ fecha|default:ahora }}" max="{{ ahora }}" aria-describedby="ayuda-fecha">
+              <div id="ayuda-fecha" class="form-text">Por defecto, ahora. Ej.: 15/09/2026 10:00.</div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <span class="form-label fw-semibold d-block">Modalidad de pago <span class="text-danger">*</span>
+                <button type="button" class="btn btn-link p-0 ms-1 ff-ayuda" data-bs-toggle="tooltip" title="Fin de mes: un solo pago en la fecha de pago del ciclo, con interés por los días. Cuotas: método francés vencido con gracia total hasta la fecha de pago."><i class="bi bi-info-circle"></i></button></span>
+              {% for valor, texto in modalidades %}
+                <div class="form-check"><input class="form-check-input" type="radio" name="modalidad" id="mod-{{ valor }}" value="{{ valor }}" {% if modalidad == valor %}checked{% endif %}>
+                  <label class="form-check-label" for="mod-{{ valor }}">{{ texto }}</label></div>
+              {% endfor %}
+              <div id="bloque-cuotas" class="mt-2 {% if modalidad != 'CUOTAS' %}d-none{% endif %}">
+                <label for="n_cuotas" class="form-label small mb-1">Número de cuotas</label>
+                <input type="number" id="n_cuotas" name="n_cuotas" class="form-control form-control-sm" min="1" max="60" value="{{ n_cuotas|default:'3' }}" aria-describedby="ayuda-cuotas">
+                <div id="ayuda-cuotas" class="form-text">Entre 1 y el máximo pactado con el cliente. Ej.: 3.</div>
+              </div>
+            </div>
+          </div>
+          <h2 class="h6 mt-2">Artículos <button type="button" class="btn btn-link p-0 ms-1 ff-ayuda" data-bs-toggle="tooltip" title="Se usa el precio de lista (crédito) del catálogo. Cantidad con punto decimal, hasta 3 decimales."><i class="bi bi-info-circle"></i></button></h2>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle" id="tabla-lineas">
+              <thead><tr><th style="min-width: 220px">Artículo</th><th style="width: 120px">Cantidad</th><th></th></tr></thead>
+              <tbody>
+                {% for ln in lineas %}
+                  <tr class="ff-linea"><td><select name="articulo" class="form-select form-select-sm" aria-label="Artículo"><option value="">— Elige —</option>
+                    {% for a in articulos %}<option value="{{ a.pk }}" {% if a.pk|stringformat:'s' == ln.articulo_id %}selected{% endif %}>{{ a.descripcion }} · {{ a.precio_credito }}</option>{% endfor %}</select></td>
+                    <td><input type="number" name="cantidad" class="form-control form-control-sm" step="0.001" min="0.001" value="{{ ln.cantidad }}" aria-label="Cantidad"></td>
+                    <td><button type="button" class="btn btn-sm btn-outline-danger ff-quitar" aria-label="Quitar línea"><i class="bi bi-trash"></i></button></td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <template id="plantilla-linea">
+            <tr class="ff-linea"><td><select name="articulo" class="form-select form-select-sm" aria-label="Artículo"><option value="">— Elige —</option>
+              {% for a in articulos %}<option value="{{ a.pk }}">{{ a.descripcion }} · {{ a.precio_credito }}{% if not a.permite_cuotas %} (solo fin de mes){% elif not a.permite_mensual %} (solo cuotas){% endif %}</option>{% endfor %}</select></td>
+              <td><input type="number" name="cantidad" class="form-control form-control-sm" step="0.001" min="0.001" value="1" aria-label="Cantidad"></td>
+              <td><button type="button" class="btn btn-sm btn-outline-danger ff-quitar" aria-label="Quitar línea"><i class="bi bi-trash"></i></button></td></tr>
+          </template>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="agregar-linea"><i class="bi bi-plus-lg"></i> Agregar artículo</button>
+        </div></div>
+      </div>
+      <div class="col-xl-6">
+        <div class="card border-0 shadow-sm sticky-xl-top" style="top: 72px"><div class="card-body" id="resultado" aria-live="polite">
+          <p class="text-body-secondary mb-0">Completa el cliente y los artículos para ver el cálculo.</p>
+        </div>
+        <div class="card-footer bg-white">
+          <button type="submit" class="btn btn-primary btn-lg w-100" id="btn-confirmar" disabled><i class="bi bi-check2-circle"></i> Confirmar venta</button>
+        </div></div>
+      </div>
+    </div>
+  </form>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/compra.js' %}"></script>{% endblock %}

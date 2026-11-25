@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Auditoría{% endblock %}
+{% block contenido %}
+  <h1 class="h3">Auditoría de la tienda</h1>
+  <p class="text-body-secondary">Todo lo que se hizo en tu tienda queda registrado y no se puede borrar ni modificar: altas, bajas, ventas, pagos, condiciones y accesos denegados.</p>
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-auto"><select name="evento" class="form-select" onchange="this.form.submit()" aria-label="Filtrar por evento">
+      <option value="">Todos los eventos</option>
+      {% for valor, texto in eventos %}<option value="{{ valor }}" {% if evento == valor %}selected{% endif %}>{{ texto }}</option>{% endfor %}
+    </select></div>
+  </form>
+  <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-sm align-middle mb-0">
+    <thead class="table-light"><tr><th>Fecha y hora</th><th>Evento</th><th>Usuario</th><th>Descripción</th><th>IP</th></tr></thead>
+    <tbody>{% for a in pagina %}<tr>
+      <td class="text-nowrap">{{ a.instante|date:"d/m/Y H:i:s" }}</td>
+      <td><span class="badge {% if a.evento == 'ACCESO_DENEGADO' or a.evento == 'COMPRA_RECHAZADA' or a.evento == 'PAGO_RECHAZADO' or a.evento == 'LOGIN_FALLIDO' %}text-bg-danger{% elif a.evento == 'COMPRA' or a.evento == 'PAGO' %}text-bg-success{% else %}text-bg-light border{% endif %}">{{ a.get_evento_display }}</span></td>
+      <td class="small">{{ a.usuario.email|default:"—" }}</td><td class="small">{{ a.descripcion }}</td><td class="small text-body-secondary">{{ a.ip|default:"" }}</td></tr>
+    {% empty %}<tr><td colspan="5" class="text-center text-body-secondary py-4">Sin eventos.</td></tr>{% endfor %}</tbody>
+  </table></div></div>
+  {% include "parciales/paginacion.html" %}
+{% endblock %}

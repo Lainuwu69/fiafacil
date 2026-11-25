@@ -1,0 +1,98 @@
+{% load static %}<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}FíaFácil{% endblock %} · FíaFácil</title>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/fiafacil.css' %}">
+  {% block estilos %}{% endblock %}
+</head>
+<body>
+  <nav class="navbar navbar-dark ff-barra sticky-top">
+    <div class="container-fluid">
+      <button class="btn btn-outline-light d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#menu"
+              aria-controls="menu" aria-label="Abrir menú"><i class="bi bi-list"></i></button>
+      <a class="navbar-brand fw-bold" href="{% url 'core:inicio' %}"><i class="bi bi-journal-check"></i> FíaFácil</a>
+      {% if request.tienda %}
+        <span class="navbar-text text-white-50 d-none d-md-inline me-auto ms-3">
+          <i class="bi bi-shop"></i> {{ request.tienda.nombre }}
+          <span class="badge text-bg-light ms-1">{{ request.membresia.get_rol_display }}</span>
+        </span>
+      {% endif %}
+      <div class="d-flex align-items-center gap-2 ms-auto">
+        {% if request.membresias|length > 1 %}
+          <form method="post" action="{% url 'cuentas:cambiar_tienda' %}" class="d-none d-sm-block">
+            {% csrf_token %}
+            <label for="sel-tienda" class="visually-hidden">Cambiar de tienda</label>
+            <select id="sel-tienda" name="membresia" class="form-select form-select-sm" onchange="this.form.submit()"
+                    title="Si tienes permisos en varias tiendas, elige con cuál trabajar.">
+              {% for m in request.membresias %}
+                <option value="{{ m.pk }}" {% if m.pk == request.membresia.pk %}selected{% endif %}>{{ m.tienda.nombre }} · {{ m.get_rol_display }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        {% endif %}
+        <a class="btn btn-sm btn-outline-light" href="{% url 'core:ayuda' %}" title="Centro de ayuda" aria-label="Centro de ayuda"><i class="bi bi-question-lg"></i></a>
+        <a class="btn btn-sm btn-outline-light" href="{% url 'cuentas:cambiar_clave' %}" title="Cambiar mi contraseña" aria-label="Cambiar mi contraseña"><i class="bi bi-key"></i></a>
+        <span class="text-white small d-none d-sm-inline"><i class="bi bi-person-circle"></i> {{ user.get_short_name|default:user.email }}</span>
+        <form method="post" action="{% url 'cuentas:logout' %}">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-outline-light" type="submit"><i class="bi bi-box-arrow-right"></i> Salir</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <aside class="col-lg-2 p-0 ff-lateral">
+        <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="menu" aria-labelledby="menu-titulo">
+          <div class="offcanvas-header">
+            <h2 class="offcanvas-title h5" id="menu-titulo">Menú</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#menu" aria-label="Cerrar"></button>
+          </div>
+          <div class="offcanvas-body p-0">
+            <nav class="nav flex-column w-100 py-2" aria-label="Menú principal">
+              {% with url=request.resolver_match.view_name %}
+              {% if user.is_staff %}
+                <div class="ff-seccion">Plataforma</div>
+                <a class="nav-link {% if url == 'tiendas:plataforma' %}active{% endif %}" href="{% url 'tiendas:plataforma' %}"><i class="bi bi-buildings"></i> Tiendas</a>
+                <a class="nav-link" href="{% url 'admin:index' %}"><i class="bi bi-gear"></i> Registro central</a>
+              {% endif %}
+              {% if request.membresia.rol == 'NEGOCIO' %}
+                <div class="ff-seccion">Mi negocio</div>
+                <a class="nav-link {% if url == 'core:panel' %}active{% endif %}" href="{% url 'core:panel' %}"><i class="bi bi-speedometer2"></i> Panel</a>
+                <a class="nav-link {% if url == 'creditos:nueva_venta' %}active{% endif %}" href="{% url 'creditos:nueva_venta' %}"><i class="bi bi-cart-plus"></i> Nueva venta</a>
+                <a class="nav-link {% if 'clientes:' in url or url == 'creditos:pago' or url == 'creditos:ciclo' %}active{% endif %}" href="{% url 'clientes:lista' %}"><i class="bi bi-people"></i> Clientes</a>
+                <a class="nav-link {% if 'tiendas:catalogo' in url or 'tiendas:articulo' in url %}active{% endif %}" href="{% url 'tiendas:catalogo' %}"><i class="bi bi-box-seam"></i> Catálogo</a>
+                <a class="nav-link {% if url == 'creditos:compras' or url == 'creditos:compra' %}active{% endif %}" href="{% url 'creditos:compras' %}"><i class="bi bi-receipt"></i> Compras</a>
+                <a class="nav-link {% if url == 'creditos:estados' %}active{% endif %}" href="{% url 'creditos:estados' %}"><i class="bi bi-file-earmark-text"></i> Estados de cuenta</a>
+                <a class="nav-link {% if url == 'creditos:pagos' or url == 'creditos:comprobante' %}active{% endif %}" href="{% url 'creditos:pagos' %}"><i class="bi bi-cash-stack"></i> Pagos</a>
+                <a class="nav-link {% if url == 'core:auditoria' %}active{% endif %}" href="{% url 'core:auditoria' %}"><i class="bi bi-shield-check"></i> Auditoría</a>
+              {% endif %}
+              {% if es_cliente %}
+                <div class="ff-seccion">Mis cuentas</div>
+                <a class="nav-link {% if 'core:portal' in url %}active{% endif %}" href="{% url 'core:portal' %}"><i class="bi bi-wallet2"></i> Mis deudas</a>
+              {% endif %}
+              <div class="ff-seccion">Ayuda</div>
+              <a class="nav-link {% if url == 'core:ayuda' %}active{% endif %}" href="{% url 'core:ayuda' %}"><i class="bi bi-question-circle"></i> Centro de ayuda</a>
+              {% if soporte_correo %}<a class="nav-link" href="mailto:{{ soporte_correo }}"><i class="bi bi-envelope"></i> Escribir a soporte</a>{% endif %}
+              {% endwith %}
+            </nav>
+          </div>
+        </div>
+      </aside>
+      <main class="col-lg-10 py-4 px-3 px-md-4">
+        {% include "parciales/mensajes.html" %}
+        {% block contenido %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  {% include "parciales/soporte.html" %}
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/fiafacil.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

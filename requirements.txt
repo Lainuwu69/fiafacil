@@ -1,0 +1,9 @@
+# Dependencias de FíaFácil (probadas con Python 3.13.17 y PostgreSQL 16.16)
+Django==5.2.19
+psycopg[binary]==3.3.9
+pillow==13.0.0
+python-dotenv==1.2.4
+# Dependencias indirectas
+asgiref==3.13.0
+sqlparse==0.6.1
+tzdata==2026.6

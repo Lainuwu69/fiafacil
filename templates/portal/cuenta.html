@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}Mi cuenta en {{ cuenta.tienda.nombre }}{% endblock %}
+{% block contenido %}
+  {% with m=cuenta.moneda %}
+  <nav aria-label="Ruta"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'core:portal' %}">Mis cuentas</a></li><li class="breadcrumb-item active">{{ cuenta.tienda.nombre }}</li></ol></nav>
+  <h1 class="h3 mb-0">{{ cuenta.tienda.nombre }}</h1>
+  <p class="text-body-secondary">Cuenta {{ cuenta.codigo }} a nombre de {{ cuenta.nombre }} · {{ cuenta.get_moneda_display }}</p>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm ff-tarjeta-indicador h-100"><div class="card-body"><div class="small text-body-secondary">Debes</div><div class="valor">{{ deuda|dinero:m }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm ff-tarjeta-indicador h-100"><div class="card-body"><div class="small text-body-secondary">Crédito disponible <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Lo que aún puedes comprar al crédito: límite menos lo que debes de capital."></i></div><div class="valor text-success">{{ disponible|dinero:m }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm ff-tarjeta-indicador h-100"><div class="card-body"><div class="small text-body-secondary">Límite</div><div class="valor">{{ vigente.limite|dinero:m }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm ff-tarjeta-indicador h-100"><div class="card-body"><div class="small text-body-secondary">Tasa pactada <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Tasa de interés acordada con la tienda y su equivalente mensual (TEM) y anual (TEA)."></i></div>
+      <div class="fw-semibold">{{ vigente.tasa_valor|tasa:2 }} {{ vigente.get_tasa_tipo_display|lower }}</div><div class="small">TEM {{ tem|tasa }} · TEA {{ tea|tasa }}</div></div></div></div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-xl-7">
+      <div class="card border-0 shadow-sm mb-3"><div class="card-header bg-white"><h2 class="h6 mb-0">Lo que debes pagar</h2></div>
+        <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+          <thead><tr><th>Vence</th><th>Concepto</th><th class="text-end">Total</th></tr></thead>
+          <tbody>{% for o in pendientes %}<tr class="{% if o.vencimiento < hoy %}table-danger{% endif %}">
+            <td>{{ o.vencimiento|date:"d/m/Y" }}{% if o.vencimiento < hoy %} <span class="badge text-bg-danger">vencida</span>{% endif %}</td>
+            <td><a href="{% url 'core:portal_compra' o.compra.pk %}">{% if o.tipo == 'CUOTA' %}Cuota {{ o.numero }}/{{ o.compra.n_cuotas }}{% else %}Pago del mes{% endif %} · compra N° {{ o.compra.numero }}</a></td>
+            <td class="ff-num fw-semibold">{{ o.total|dinero:m }}</td></tr>
+          {% empty %}<tr><td colspan="3" class="text-center text-body-secondary py-3">¡Estás al día! No tienes deudas pendientes.</td></tr>{% endfor %}</tbody>
+        </table></div></div>
+      <div class="card border-0 shadow-sm mb-3"><div class="card-header bg-white"><h2 class="h6 mb-0">Mis estados de cuenta</h2></div>
+        <ul class="list-group list-group-flush">{% for c in cortes %}
+          <li class="list-group-item d-flex justify-content-between align-items-center"><span>Corte {{ c.corte|date:"d/m/Y" }}{% if not c.estado %} <span class="badge text-bg-light border">{% if c.corte > ahora %}en curso{% else %}por emitir{% endif %}</span>{% endif %}</span>
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'core:portal_ciclo' cuenta.pk c.corte|date:'YmdHis' %}">Ver</a></li>
+        {% empty %}<li class="list-group-item text-body-secondary">Aún no tienes estados de cuenta.</li>{% endfor %}</ul></div>
+    </div>
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm mb-3"><div class="card-header bg-white"><h2 class="h6 mb-0">Mis compras</h2></div>
+        <ul class="list-group list-group-flush small">{% for c in compras %}
+          <li class="list-group-item d-flex justify-content-between"><a href="{% url 'core:portal_compra' c.pk %}">N° {{ c.numero }} · {{ c.fecha_compra|date:"d/m/Y" }} · {% if c.modalidad == 'CUOTAS' %}{{ c.n_cuotas }} cuotas{% else %}fin de mes{% endif %}</a>{% if c.anulada %} <span class="badge text-bg-danger">Anulada</span>{% endif %}<span class="ff-num">{{ c.total|dinero:m }}</span></li>
+        {% empty %}<li class="list-group-item text-body-secondary">Sin compras.</li>{% endfor %}</ul></div>
+      <div class="card border-0 shadow-sm mb-3"><div class="card-header bg-white"><h2 class="h6 mb-0">Mis pagos</h2></div>
+        <ul class="list-group list-group-flush small">{% for p in pagos %}
+          <li class="list-group-item d-flex justify-content-between"><a href="{% url 'core:portal_comprobante' p.pk %}">Comprobante {{ p.numero|stringformat:"06d" }} · {{ p.fecha_efectiva|date:"d/m/Y" }}</a>{% if p.anulado %} <span class="badge text-bg-danger">Anulado</span>{% endif %}<span class="ff-num">{{ p.total|dinero:m }}</span></li>
+        {% empty %}<li class="list-group-item text-body-secondary">Sin pagos registrados.</li>{% endfor %}</ul></div>
+      {% if vigente %}<p class="small text-body-secondary">Tu ciclo cierra el día {{ vigente.dia_corte }} a las {{ vigente.hora_corte|time:"H:i" }}; lo que compres a esa hora o después se paga el mes siguiente. Pagas el día {{ vigente.dia_pago }}. Si pagas tarde se cobra la tasa moratoria de {{ vigente.mora_valor|tasa:2 }} {{ vigente.get_mora_tipo_display|lower }} por los días de atraso.</p>{% endif %}
+    </div>
+  </div>
+  {% endwith %}
+{% endblock %}

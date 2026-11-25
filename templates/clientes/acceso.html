@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}Acceso del cliente · {{ cuenta.codigo }}{% endblock %}
+{% block contenido %}
+  <nav aria-label="Ruta"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'clientes:lista' %}">Clientes</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'clientes:detalle' cuenta.pk %}">{{ cuenta.codigo }} {{ cuenta.nombre }}</a></li><li class="breadcrumb-item active">Acceso</li></ol></nav>
+  <div class="row"><div class="col-lg-7">
+    <h1 class="h3">Acceso al portal del cliente</h1>
+    <p class="text-body-secondary">El cliente podrá <strong>solo consultar</strong> su deuda, su crédito disponible, sus compras, sus estados de cuenta y sus comprobantes. No podrá modificar nada.</p>
+    {% if cuenta.usuario %}<div class="alert alert-success">Esta cuenta ya está vinculada a <strong>{{ cuenta.usuario.email }}</strong>.</div>{% endif %}
+    <form method="post" novalidate data-un-envio class="card border-0 shadow-sm"><div class="card-body">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      {% campo form.email %}
+      {% campo form.password %}
+      <button class="btn btn-primary" type="submit"><i class="bi bi-person-check"></i> Dar acceso</button>
+    </div></form>
+  </div></div>
+{% endblock %}

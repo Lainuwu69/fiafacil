@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load ff static %}
+{% block titulo %}Nuevas condiciones · {{ cuenta.codigo }}{% endblock %}
+{% block contenido %}
+  <nav aria-label="Ruta"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'clientes:lista' %}">Clientes</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'clientes:detalle' cuenta.pk %}">{{ cuenta.codigo }} {{ cuenta.nombre }}</a></li><li class="breadcrumb-item active">Condiciones</li></ol></nav>
+  <h1 class="h3">Cambiar condiciones de crédito</h1>
+  <div class="alert alert-info"><i class="bi bi-info-circle"></i> Se creará la <strong>versión {% if vigente %}{{ vigente.version|add:1 }}{% else %}1{% endif %}</strong>.
+    Las compras ya registradas conservan las condiciones con las que se hicieron (RN10); las nuevas usarán estas.</div>
+  <form method="post" novalidate data-un-envio>
+    {% csrf_token %}
+    <div class="card border-0 shadow-sm mb-3"><div class="card-body">{% include "clientes/_condicion_campos.html" %}</div></div>
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Guardar nueva versión</button>
+    <a href="{% url 'clientes:detalle' cuenta.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+  </form>
+{% endblock %}
+{% block scripts %}<script>document.body.dataset.apiTasa = "{% url 'clientes:api_tasa' %}";</script><script src="{% static 'js/condicion.js' %}"></script>{% endblock %}

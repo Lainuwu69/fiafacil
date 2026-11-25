@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titulo %}Comprobante {{ pago.numero|stringformat:"06d" }}{% endblock %}
+{% block contenido %}
+  <div class="d-flex justify-content-between align-items-center mb-3 d-print-none">
+    <a href="{% url 'clientes:detalle' pago.cuenta.pk %}"><i class="bi bi-arrow-left"></i> Volver al cliente</a>
+    <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
+  </div>
+  {% url 'creditos:anular_pago' pago.pk as url_anular %}
+  {% include "parciales/anulacion.html" with que="el pago" %}
+  {% include "parciales/comprobante_cuerpo.html" %}
+  <p class="text-center small text-body-secondary mt-2 d-print-none">Registrado por {{ pago.registrado_por.email }}.</p>
+{% endblock %}

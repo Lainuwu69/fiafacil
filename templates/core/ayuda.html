@@ -1,0 +1,133 @@
+{% extends base %}
+{% block titulo %}Ayuda{% endblock %}
+{% block ancho %}col-12 col-xl-10{% endblock %}
+{% block contenido %}
+<div class="ff-ayuda-pagina">
+  <h1 class="h3">Centro de ayuda de FíaFácil</h1>
+  <p class="text-body-secondary">Todo lo que necesitas para llevar las cuentas de tus fiados: cómo empezar, qué puede hacer cada perfil, cómo se calculan los intereses y a quién escribir si tienes un problema.
+    Además, en cada formulario el ícono <i class="bi bi-info-circle text-primary"></i> explica el campo y debajo verás un ejemplo de cómo llenarlo.</p>
+
+  <nav class="mb-4" aria-label="Secciones de la ayuda">
+    <ul class="nav nav-pills flex-wrap gap-1 small">
+      <li class="nav-item"><a class="nav-link border" href="#empezar">Primeros pasos</a></li>
+      <li class="nav-item"><a class="nav-link border" href="#perfiles">Perfiles</a></li>
+      <li class="nav-item"><a class="nav-link border" href="#calculos">Cómo se calcula</a></li>
+      <li class="nav-item"><a class="nav-link border" href="#preguntas">Preguntas frecuentes</a></li>
+      <li class="nav-item"><a class="nav-link border" href="#glosario">Glosario</a></li>
+      <li class="nav-item"><a class="nav-link border" href="#soporte">Soporte</a></li>
+    </ul>
+  </nav>
+
+  <section id="empezar" class="mb-5">
+    <h2 class="h4"><i class="bi bi-signpost-2"></i> Primeros pasos (para el negocio)</h2>
+    <ol class="list-group list-group-numbered">
+      <li class="list-group-item"><strong>Registra tu negocio</strong> en <a href="{% url 'cuentas:registro' %}">Registra tu negocio</a> con tu correo y una contraseña. Tu tienda queda <em>pendiente</em>.</li>
+      <li class="list-group-item"><strong>Espera la activación.</strong> El administrador de la plataforma revisa tus datos y activa la tienda. Mientras tanto ya puedes iniciar sesión.</li>
+      <li class="list-group-item"><strong>Arma tu catálogo</strong> (menú <em>Catálogo</em>): cada producto o servicio con su foto, precio contado, precio de lista y si se vende a fin de mes, en cuotas o de ambas formas.</li>
+      <li class="list-group-item"><strong>Registra a tus clientes</strong> (menú <em>Clientes</em>) con sus condiciones: tasa, moneda, límite de crédito, máximo de cuotas, día y hora de corte y día de pago. Si quieres, dales acceso al portal para que consulten su deuda.</li>
+      <li class="list-group-item"><strong>Vende al crédito</strong> (menú <em>Nueva venta</em>): antes de confirmar verás cuándo vence, cuánto interés paga, la TCEA y cómo queda su crédito disponible.</li>
+      <li class="list-group-item"><strong>En la fecha de corte</strong> se generan los estados de cuenta: el listado de lo que cada cliente debe pagar. El sistema los genera solo cada noche; también puedes hacerlo desde el menú <em>Estados de cuenta</em>.</li>
+      <li class="list-group-item"><strong>Cobra</strong> desde la ficha del cliente (<em>Registrar pago</em>): marca lo que paga y la fecha; el sistema suma la mora si pagó tarde y emite el comprobante.</li>
+      <li class="list-group-item"><strong>Revisa tu panel</strong>: cuánto tienes por cobrar, cuánto está vencido, tu índice de morosidad y cuánto esperas cobrar cada mes.</li>
+    </ol>
+  </section>
+
+  <section id="perfiles" class="mb-5">
+    <h2 class="h4"><i class="bi bi-people"></i> Perfiles</h2>
+    <div class="row g-3">
+      <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+        <h3 class="h6"><i class="bi bi-buildings"></i> Administrador de la plataforma</h3>
+        <p class="small mb-0">Activa las tiendas que se registran y las da de baja si es necesario. La baja no borra nada: la tienda deja de operar, pero su historial se conserva.</p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+        <h3 class="h6"><i class="bi bi-shop"></i> Administrador del negocio</h3>
+        <p class="small mb-0">Administra su tienda: catálogo, clientes y condiciones, ventas, estados de cuenta, pagos y auditoría. Solo ve los datos de su propia tienda.</p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+        <h3 class="h6"><i class="bi bi-person"></i> Cliente</h3>
+        <p class="small mb-0">Solo consulta: su deuda, su crédito disponible, sus compras, sus estados de cuenta y sus comprobantes, en cada tienda donde compra. No puede modificar nada.</p>
+      </div></div></div>
+    </div>
+  </section>
+
+  <section id="calculos" class="mb-5">
+    <h2 class="h4"><i class="bi bi-calculator"></i> Cómo se calcula</h2>
+    <p>Convenciones obligatorias del curso: año de <strong>360 días</strong> y mes de <strong>30 días</strong>; los días entre dos fechas se cuentan <strong>sin el primer día y con el último</strong>; los importes se redondean a <strong>2 decimales</strong> (hacia arriba desde 0.005) y las tasas se muestran con al menos <strong>7 decimales</strong>. Una tasa nominal sin capitalización indicada se toma como <strong>diaria</strong>, y una tasa sin periodo, como <strong>anual</strong>.</p>
+    <div class="table-responsive"><table class="table table-sm align-middle">
+      <thead class="table-light"><tr><th>Concepto</th><th>Fórmula</th><th>Ejemplo</th></tr></thead>
+      <tbody>
+        <tr><td>Tasa efectiva para d días</td><td><code>i(d) = (1 + i(p))<sup>d/p</sup> − 1</code></td><td>TEA 24 % → TEM = 1.24<sup>30/360</sup> − 1 = 1.8087582 %</td></tr>
+        <tr><td>Tasa nominal para d días</td><td><code>m = p/c ; i(d) = (1 + j/m)<sup>d/c</sup> − 1</code></td><td>TNA 24 % capitalización mensual → TEM 2 %; TEA 26.8241795 %</td></tr>
+        <tr><td>Ciclo de una compra</td><td>Compra antes de la fecha y hora de corte → paga este mes; a la hora del corte o después → el mes siguiente</td><td>Corte 20 a las 20:00: compra a las 19:59:59 paga el 26/09; a las 20:00:00, el 26/10</td></tr>
+        <tr><td>Compra a fin de mes</td><td><code>I = P × i(días hasta el pago) ; V = P + I</code></td><td>120 del 05/09 al 26/09 (21 días) a TEA 24 %: interés 1.52</td></tr>
+        <tr><td>Gracia total (cuotas)</td><td><code>Pg = P × (1 + TEM)<sup>g/30</sup></code></td><td>600 con 11 días de gracia y TEM 2 %: Pg = 604.37</td></tr>
+        <tr><td>Cuota (método francés vencido)</td><td><code>C = Pg × i / [1 − (1 + i)<sup>−n</sup>]</code></td><td>604.37 en 3 cuotas al 2 %: 209.57</td></tr>
+        <tr><td>Cada cuota</td><td><code>Interés = saldo × i ; Amortización = C − Interés</code>; la última se ajusta para cerrar en 0.00</td><td>Cuota 1: interés 12.09, amortización 197.48, saldo 406.89</td></tr>
+        <tr><td>Intereses por mora</td><td><code>M = V × iₘ(días de atraso)</code>, sobre el total que debió pagarse; se muestra aparte</td><td>201.90 pagado 5 días tarde con TEA moratoria 3 %: 0.08</td></tr>
+        <tr><td>Orden del pago</td><td>Primero la mora, luego el interés compensatorio y al final el capital</td><td>Pago de 201.98 = 0.08 + 1.90 + 200.00</td></tr>
+        <tr><td>Crédito disponible</td><td><code>Disponible = Límite − capital pendiente</code> (en cuotas, con la gracia capitalizada)</td><td>Límite 1,000 y Pg 604.37: disponible 395.63</td></tr>
+        <tr><td>TCEA</td><td>Tasa que iguala lo recibido con lo que se paga: <code>Σ Pagoₜ / (1 + TCEA)<sup>t/360</sup> = Valor recibido</code></td><td>600 en 3 cuotas de 209.57: TCEA 26.8273729 %</td></tr>
+      </tbody>
+    </table></div>
+    <h3 class="h6 mt-3">Indicadores del panel</h3>
+    <ul class="small">
+      <li><strong>Capital por cobrar</strong>: dinero que entregaste en mercadería y aún no vuelve (capital de trabajo inmovilizado).</li>
+      <li><strong>Índice de morosidad</strong> = Vencido ÷ Total por cobrar.</li>
+      <li><strong>Periodo promedio de cobro</strong> = Capital por cobrar ÷ ventas al crédito de los últimos 90 días × 90. Es cuántos días tarda en promedio en volver el dinero fiado.</li>
+      <li><strong>Flujo de caja proyectado</strong>: lo que esperas cobrar cada mes según los vencimientos pendientes.</li>
+    </ul>
+  </section>
+
+  <section id="preguntas" class="mb-5">
+    <h2 class="h4"><i class="bi bi-question-circle"></i> Preguntas frecuentes</h2>
+    <div class="accordion" id="faq">
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f1">¿Por qué no se acepta un pago parcial?</button></h3>
+        <div id="f1" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">Las reglas del servicio piden cancelar completa cada obligación (el pago del mes o una cuota). Puedes elegir qué obligaciones paga el cliente, pero el importe debe ser exactamente su total, incluida la mora si pagó tarde.</div></div></div>
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f2">¿Qué pasa si vendo justo a la hora del corte?</button></h3>
+        <div id="f2" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">Una compra a la hora exacta del corte o después pasa al ciclo siguiente: se paga el mes que viene. Solo lo comprado antes de esa hora entra al ciclo actual. Se usa siempre la hora de Lima.</div></div></div>
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f3">¿Por qué la venta fue rechazada por el límite si al cliente le quedaba crédito?</button></h3>
+        <div id="f3" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">En cuotas se compara el capital <em>después</em> de la gracia (Pg), que es un poco mayor que el precio. Por ejemplo, 600 en cuotas ocupa 604.37 de crédito. El mensaje te dice cuánto hay disponible y cuánto se necesita.</div></div></div>
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f4">Si cambio la tasa de un cliente, ¿cambian sus compras anteriores?</button></h3>
+        <div id="f4" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">No. Cada cambio crea una nueva versión de las condiciones. Las compras ya registradas conservan la versión con la que se hicieron; solo las nuevas usan la nueva tasa.</div></div></div>
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f5">¿Puedo pasar al sistema los fiados que tengo anotados en mi cuaderno?</button></h3>
+        <div id="f5" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">Sí. En la venta puedes poner una fecha pasada (nunca futura). Para eso, las condiciones del cliente deben estar vigentes desde antes de esa fecha: usa el campo <em>Vigente desde</em> al registrarlo. Lo que no se puede es agregar compras a un ciclo cuyo estado de cuenta ya se generó.</div></div></div>
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f6">Me equivoqué en una venta o en un pago: ¿lo puedo borrar?</button></h3>
+        <div id="f6" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">No se borra ni se edita: se <strong>anula</strong>, para que siempre se pueda reconstruir de dónde sale cada saldo. Abre la venta (menú <em>Compras</em>) o el comprobante (menú <em>Pagos</em>), despliega «Anular…» y escribe el motivo. Una venta se puede anular si ninguna de sus cuotas fue pagada (si lo fue, primero anula esos pagos); los pagos se anulan del más reciente al más antiguo. Al anular un pago, lo que cancelaba vuelve a quedar pendiente. Todo queda en la auditoría con tu usuario y el motivo.</div></div></div>
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f7">¿Puedo vender en soles y en dólares al mismo cliente?</button></h3>
+        <div id="f7" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">Sí, con dos cuentas: cada cuenta tiene una sola moneda y el sistema no convierte ni suma soles con dólares.</div></div></div>
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f8">¿Qué significa la TCEA que aparece en la venta?</button></h3>
+        <div id="f8" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">Es el costo efectivo anual del crédito: la tasa que iguala lo que el cliente recibe con todo lo que paga. La "TCEA sobre precio contado" además considera la diferencia entre el precio de lista y el precio contado, y sirve para comparar alternativas de pago.</div></div></div>
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f9">Olvidé mi contraseña o me bloqueó el sistema</button></h3>
+        <div id="f9" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">Después de 5 intentos fallidos el acceso se bloquea 15 minutos por seguridad. Para <strong>cambiar</strong> tu contraseña usa el botón de la llave <i class="bi bi-key"></i> en la barra superior. Si la <strong>olvidaste</strong>, escribe a soporte desde el correo con el que te registraste: el administrador de la plataforma la restablece.</div></div></div>
+      <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f10">¿Mis datos y los de mis clientes están protegidos?</button></h3>
+        <div id="f10" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">Cada tienda ve solo sus propios datos y cada cliente solo los suyos; las contraseñas se guardan cifradas y cada acción queda registrada en la auditoría. Los datos se usan únicamente para llevar las cuentas del negocio (Ley 29733 de Protección de Datos Personales).</div></div></div>
+    </div>
+  </section>
+
+  <section id="glosario" class="mb-5">
+    <h2 class="h4"><i class="bi bi-book"></i> Glosario</h2>
+    <dl class="row small">
+      <dt class="col-sm-3">Fecha de corte</dt><dd class="col-sm-9">Día y hora en que se cierra el ciclo; lo comprado antes se paga en la fecha de pago de ese mes.</dd>
+      <dt class="col-sm-3">Fecha de pago</dt><dd class="col-sm-9">Día del mes en que el cliente se compromete a pagar.</dd>
+      <dt class="col-sm-3">Precio contado / de lista</dt><dd class="col-sm-9">Lo que cuesta pagando en el momento / el precio que se financia al vender al crédito.</dd>
+      <dt class="col-sm-3">Tasa nominal / efectiva</dt><dd class="col-sm-9">La nominal necesita saber cada cuánto se capitaliza; la efectiva ya expresa el interés real del periodo. Una TEA no se divide entre 12.</dd>
+      <dt class="col-sm-3">TEM / TEA</dt><dd class="col-sm-9">Tasa efectiva mensual (30 días) / anual (360 días).</dd>
+      <dt class="col-sm-3">Gracia total</dt><dd class="col-sm-9">Tiempo entre la compra en cuotas y la fecha de pago del ciclo: no se paga nada, pero los intereses se suman al capital antes de calcular las cuotas.</dd>
+      <dt class="col-sm-3">Método francés</dt><dd class="col-sm-9">Cuotas iguales al final de cada mes; al inicio pagan más interés y al final más capital.</dd>
+      <dt class="col-sm-3">Interés compensatorio / moratorio</dt><dd class="col-sm-9">El primero es el costo por financiar la compra; el segundo se cobra por los días de atraso (Código Civil, art. 1242).</dd>
+      <dt class="col-sm-3">Obligación</dt><dd class="col-sm-9">Cada monto que vence en una fecha: el pago del mes de una compra o una cuota.</dd>
+      <dt class="col-sm-3">Estado de cuenta</dt><dd class="col-sm-9">Listado de lo que el cliente debe pagar en un ciclo, con sus compras ordenadas por fecha.</dd>
+      <dt class="col-sm-3">Baja lógica</dt><dd class="col-sm-9">Desactivar un registro sin borrarlo, para conservar su historial.</dd>
+    </dl>
+  </section>
+
+  <section id="soporte" class="mb-4">
+    <h2 class="h4"><i class="bi bi-headset"></i> Soporte técnico</h2>
+    <p>Si algo no funciona o tienes una duda que esta página no responde, escríbenos. Para ayudarte más rápido, indica tu correo de usuario, el código de tu tienda (por ejemplo T001), qué estabas haciendo y el mensaje que viste.</p>
+    <div class="d-flex flex-wrap gap-2">
+      {% if soporte_whatsapp %}<a class="btn btn-success" href="https://wa.me/{{ soporte_whatsapp }}?text=Hola%2C%20necesito%20ayuda%20con%20F%C3%ADaF%C3%A1cil" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> WhatsApp</a>{% endif %}
+      {% if soporte_correo %}<a class="btn btn-outline-primary" href="mailto:{{ soporte_correo }}?subject=Ayuda%20con%20F%C3%ADaF%C3%A1cil"><i class="bi bi-envelope"></i> {{ soporte_correo }}</a>{% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

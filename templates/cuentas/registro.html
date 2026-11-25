@@ -1,0 +1,43 @@
+{% extends "base_auth.html" %}
+{% load ff %}
+{% block titulo %}Registra tu negocio{% endblock %}
+{% block ancho %}col-12 col-md-10 col-lg-8{% endblock %}
+{% block contenido %}
+  <h1 class="h4 mb-1">Registra tu negocio</h1>
+  <p class="text-body-secondary">Crea tu usuario y tu tienda. La plataforma revisará tus datos y activará la tienda para que empieces a vender al crédito.</p>
+  <form method="post" novalidate data-un-envio>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+    <fieldset class="mb-2">
+      <legend class="h6 text-uppercase text-body-secondary">1. Tus datos de acceso</legend>
+      <div class="row">
+        <div class="col-md-6">{% campo form.nombres %}</div>
+        <div class="col-md-6">{% campo form.apellidos %}</div>
+      </div>
+      {% campo form.email %}
+      <div class="row">
+        <div class="col-md-6">{% campo form.password1 %}</div>
+        <div class="col-md-6">{% campo form.password2 %}</div>
+      </div>
+    </fieldset>
+    <fieldset class="mb-2">
+      <legend class="h6 text-uppercase text-body-secondary">2. Tu negocio</legend>
+      <div class="row">
+        <div class="col-md-7">{% campo form.nombre_tienda %}</div>
+        <div class="col-md-5">{% campo form.giro list="giros" %}</div>
+      </div>
+      <datalist id="giros">
+        <option value="Bodega"><option value="Panadería"><option value="Pollería"><option value="Carnicería">
+        <option value="Frutería"><option value="Peluquería"><option value="Spa"><option value="Licorería"><option value="Bazar">
+      </datalist>
+      <div class="row">
+        <div class="col-md-6">{% campo form.ruc inputmode="numeric" maxlength="11" %}</div>
+        <div class="col-md-6">{% campo form.telefono inputmode="tel" %}</div>
+      </div>
+      {% campo form.direccion %}
+    </fieldset>
+    {% campo form.acepta_privacidad %}
+    <button type="submit" class="btn btn-primary w-100 btn-lg"><i class="bi bi-person-plus"></i> Crear mi cuenta</button>
+  </form>
+  <p class="text-center mt-3 mb-0">¿Ya tienes cuenta? <a href="{% url 'cuentas:login' %}">Inicia sesión</a></p>
+{% endblock %}

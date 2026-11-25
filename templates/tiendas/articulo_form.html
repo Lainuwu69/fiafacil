@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}{% if articulo %}Editar artículo{% else %}Nuevo artículo{% endif %}{% endblock %}
+{% block contenido %}
+  <nav aria-label="Ruta"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'tiendas:catalogo' %}">Catálogo</a></li><li class="breadcrumb-item active">{% if articulo %}{{ articulo }}{% else %}Nuevo{% endif %}</li></ol></nav>
+  <h1 class="h3 mb-3">{% if articulo %}Editar «{{ articulo }}»{% else %}Nuevo producto o servicio{% endif %}</h1>
+  <form method="post" enctype="multipart/form-data" novalidate data-un-envio class="row">
+    {% csrf_token %}
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        {% campo form.descripcion %}
+        <div class="row">
+          <div class="col-md-6">{% campo form.marca %}</div>
+          <div class="col-md-6">{% campo form.proveedor %}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">{% campo form.unidad %}</div>
+          <div class="col-md-4">{% campo form.precio_contado %}</div>
+          <div class="col-md-4">{% campo form.precio_credito %}</div>
+        </div>
+        <fieldset class="mb-2">
+          <legend class="h6">¿Cómo se puede vender al crédito?</legend>
+          {% campo form.permite_mensual %}
+          {% campo form.permite_cuotas %}
+        </fieldset>
+        {% campo form.imagen %}
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Guardar</button>
+          <a href="{% url 'tiendas:catalogo' %}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </div></div>
+    </div>
+    <div class="col-lg-4 mt-3 mt-lg-0">
+      <div class="card border-0 shadow-sm"><div class="card-body text-center">
+        <p class="small text-body-secondary mb-2">Vista previa de la imagen</p>
+        <img id="vista-previa" src="{% if articulo %}{{ articulo.imagen.url }}{% endif %}" alt="Vista previa" class="img-fluid rounded {% if not articulo %}d-none{% endif %}" style="max-height: 220px">
+      </div></div>
+    </div>
+  </form>
+{% endblock %}
+{% block scripts %}
+<script>
+  // Vista previa de la imagen elegida (solo se muestra; el servidor valida tamaño y formato).
+  document.getElementById("id_imagen").addEventListener("change", function (e) {
+    var f = e.target.files[0], img = document.getElementById("vista-previa");
+    if (f) { img.src = URL.createObjectURL(f); img.classList.remove("d-none"); }
+  });
+</script>
+{% endblock %}

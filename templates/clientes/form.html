@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load ff static %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block contenido %}
+  <nav aria-label="Ruta"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'clientes:lista' %}">Clientes</a></li>
+    {% if cuenta %}<li class="breadcrumb-item"><a href="{% url 'clientes:detalle' cuenta.pk %}">{{ cuenta.codigo }}</a></li>{% endif %}
+    <li class="breadcrumb-item active">{{ titulo }}</li></ol></nav>
+  <h1 class="h3 mb-3">{{ titulo }}</h1>
+  <form method="post" novalidate data-un-envio>
+    {% csrf_token %}
+    <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+      <h2 class="h5">Datos generales</h2>
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="row">
+        <div class="col-md-3">{% campo form.tipo_documento %}</div>
+        <div class="col-md-3">{% campo form.documento %}</div>
+        <div class="col-md-6">{% campo form.nombre %}</div>
+        <div class="col-md-4">{% campo form.telefono inputmode="tel" %}</div>
+        <div class="col-md-4">{% campo form.correo %}</div>
+        <div class="col-md-4">{% campo form.moneda %}</div>
+        <div class="col-12">{% campo form.direccion %}</div>
+      </div>
+    </div></div>
+    {% if cond %}
+      <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+        <h2 class="h5">Condiciones de crédito <span class="badge text-bg-light border">versión 1</span></h2>
+        <p class="small text-body-secondary">Escribe las tasas en porcentaje. El sistema las guarda en decimal y muestra su TEM y TEA equivalentes.</p>
+        {% include "clientes/_condicion_campos.html" %}
+      </div></div>
+    {% endif %}
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Guardar</button>
+    <a href="{% if cuenta %}{% url 'clientes:detalle' cuenta.pk %}{% else %}{% url 'clientes:lista' %}{% endif %}" class="btn btn-outline-secondary">Cancelar</a>
+  </form>
+{% endblock %}
+{% block scripts %}{% if cond %}<script>document.body.dataset.apiTasa = "{% url 'clientes:api_tasa' %}";</script><script src="{% static 'js/condicion.js' %}"></script>{% endif %}{% endblock %}

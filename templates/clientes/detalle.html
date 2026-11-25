@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}{{ cuenta.codigo }} {{ cuenta.nombre }}{% endblock %}
+{% block contenido %}
+  <nav aria-label="Ruta"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'clientes:lista' %}">Clientes</a></li><li class="breadcrumb-item active">{{ cuenta.codigo }}</li></ol></nav>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h3 mb-0">{{ cuenta.codigo }} · {{ cuenta.nombre }} {% if not cuenta.activo %}<span class="badge text-bg-secondary">Dada de baja</span>{% endif %}</h1>
+      <p class="text-body-secondary mb-0">{{ cuenta.tipo_documento }} {{ cuenta.documento }} · {{ cuenta.get_moneda_display }}{% if cuenta.telefono %} · <i class="bi bi-telephone"></i> {{ cuenta.telefono }}{% endif %}{% if cuenta.usuario %} · <i class="bi bi-person-check"></i> portal: {{ cuenta.usuario.email }}{% endif %}</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% if cuenta.activo %}<a href="{% url 'creditos:nueva_venta' %}?cuenta={{ cuenta.pk }}" class="btn btn-primary"><i class="bi bi-cart-plus"></i> Nueva venta</a>{% endif %}
+      <a href="{% url 'creditos:pago' cuenta.pk %}" class="btn btn-success"><i class="bi bi-cash-coin"></i> Registrar pago</a>
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Más</button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="{% url 'clientes:editar' cuenta.pk %}"><i class="bi bi-pencil"></i> Editar datos</a></li>
+          <li><a class="dropdown-item" href="{% url 'clientes:condicion' cuenta.pk %}"><i class="bi bi-sliders"></i> Cambiar condiciones</a></li>
+          <li><a class="dropdown-item" href="{% url 'clientes:acceso' cuenta.pk %}"><i class="bi bi-person-check"></i> Acceso al portal</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><form method="post" action="{% url 'clientes:estado' cuenta.pk %}">{% csrf_token %}
+            <button class="dropdown-item {% if cuenta.activo %}text-danger{% endif %}">{% if cuenta.activo %}<i class="bi bi-slash-circle"></i> Dar de baja{% else %}<i class="bi bi-arrow-counterclockwise"></i> Reactivar{% endif %}</button></form></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm ff-tarjeta-indicador h-100"><div class="card-body">
+      <div class="small text-body-secondary">Deuda pendiente <span title="Capital + intereses de las obligaciones aún no pagadas (sin mora)." data-bs-toggle="tooltip"><i class="bi bi-info-circle"></i></span></div>
+      <div class="valor">{{ deuda|dinero:cuenta.moneda }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm ff-tarjeta-indicador h-100"><div class="card-body">
+      <div class="small text-body-secondary">Capital comprometido <span title="Exposición (RN06): capital pendiente, incluida la gracia capitalizada; sin intereses futuros." data-bs-toggle="tooltip"><i class="bi bi-info-circle"></i></span></div>
+      <div class="valor">{{ exposicion|dinero:cuenta.moneda }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm ff-tarjeta-indicador h-100"><div class="card-body">
+      <div class="small text-body-secondary">Crédito disponible <span title="Disponible = Límite − Capital comprometido." data-bs-toggle="tooltip"><i class="bi bi-info-circle"></i></span></div>
+      <div class="valor text-success">{{ disponible|dinero:cuenta.moneda }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm ff-tarjeta-indicador h-100"><div class="card-body">
+      <div class="small text-body-secondary">Límite</div>
+      <div class="valor">{{ vigente.limite|dinero:cuenta.moneda }}</div></div></div></div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-xl-7">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white"><h2 class="h6 mb-0">Obligaciones pendientes</h2></div>
+        <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+          <thead><tr><th>Vence</th><th>Concepto</th><th class="text-end">Capital</th><th class="text-end">Interés</th><th class="text-end">Total</th></tr></thead>
+          <tbody>
+            {% for o in pendientes %}
+              <tr class="{% if o.vencimiento < hoy %}table-danger{% endif %}">
+                <td>{{ o.vencimiento|date:"d/m/Y" }}</td>
+                <td><a href="{% url 'creditos:compra' o.compra.pk %}">{% if o.tipo == 'CUOTA' %}Cuota {{ o.numero }}/{{ o.compra.n_cuotas }}{% else %}Pago mensual{% endif %} · compra N° {{ o.compra.numero }}</a></td>
+                <td class="ff-num">{{ o.capital|dinero:cuenta.moneda }}</td><td class="ff-num">{{ o.interes|dinero:cuenta.moneda }}</td><td class="ff-num fw-semibold">{{ o.total|dinero:cuenta.moneda }}</td>
+              </tr>
+            {% empty %}<tr><td colspan="5" class="text-body-secondary text-center py-3">No tiene deudas pendientes.</td></tr>{% endfor %}
+          </tbody>
+        </table></div>
+      </div>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white"><h2 class="h6 mb-0">Estados de cuenta por ciclo</h2></div>
+        <ul class="list-group list-group-flush">
+          {% for c in cortes %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>Corte {{ c.corte|date:"d/m/Y H:i" }}</span>
+              <span>{% if c.estado %}<span class="badge text-bg-success">Generado</span>{% else %}<span class="badge text-bg-light border">Vista previa</span>{% endif %}
+                <a class="btn btn-sm btn-outline-primary ms-2" href="{% url 'creditos:ciclo' cuenta.pk c.corte|date:'YmdHi' %}">Ver</a></span>
+            </li>
+          {% empty %}<li class="list-group-item text-body-secondary">Aún no hay ciclos con compras.</li>{% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white d-flex justify-content-between"><h2 class="h6 mb-0">Condiciones vigentes {% if vigente %}<span class="badge text-bg-light border">v{{ vigente.version }}</span>{% endif %}</h2>
+          <a href="{% url 'clientes:condicion' cuenta.pk %}" class="small">Cambiar</a></div>
+        {% if vigente %}
+        <ul class="list-group list-group-flush small">
+          <li class="list-group-item">Tasa: <strong>{{ vigente.tasa_valor|tasa }}</strong> {{ vigente.get_tasa_tipo_display|lower }} {{ vigente.get_tasa_periodo_display|lower }}{% if vigente.tasa_capitalizacion %}, capitalización {{ vigente.get_tasa_capitalizacion_display|lower }}{% endif %}</li>
+          <li class="list-group-item">Equivale a TEM <strong>{{ tem|tasa }}</strong> · TEA <strong>{{ tea|tasa }}</strong></li>
+          <li class="list-group-item">Moratoria: {{ vigente.mora_valor|tasa }} {{ vigente.get_mora_tipo_display|lower }} {{ vigente.get_mora_periodo_display|lower }}</li>
+          <li class="list-group-item">Corte día {{ vigente.dia_corte }} a las {{ vigente.hora_corte|time:"H:i" }} · pago día {{ vigente.dia_pago }} · hasta {{ vigente.plazo_max }} cuotas</li>
+          <li class="list-group-item text-body-secondary">Vigente desde {{ vigente.vigente_desde|date:"d/m/Y H:i" }}</li>
+        </ul>
+        {% else %}<div class="card-body text-danger">Sin condiciones vigentes.</div>{% endif %}
+      </div>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white"><h2 class="h6 mb-0">Últimas compras</h2></div>
+        <ul class="list-group list-group-flush small">
+          {% for c in compras %}<li class="list-group-item d-flex justify-content-between"><a href="{% url 'creditos:compra' c.pk %}">N° {{ c.numero }} · {{ c.fecha_compra|date:"d/m/Y H:i" }} · {{ c.get_modalidad_display|truncatewords:3 }}</a>{% if c.anulada %} <span class="badge text-bg-danger">Anulada</span>{% endif %}<span class="ff-num">{{ c.capital|dinero:cuenta.moneda }}</span></li>
+          {% empty %}<li class="list-group-item text-body-secondary">Sin compras.</li>{% endfor %}
+        </ul>
+      </div>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white"><h2 class="h6 mb-0">Últimos pagos</h2></div>
+        <ul class="list-group list-group-flush small">
+          {% for p in pagos %}<li class="list-group-item d-flex justify-content-between"><a href="{% url 'creditos:comprobante' p.pk %}">Comprobante {{ p.numero|stringformat:"06d" }} · {{ p.fecha_efectiva|date:"d/m/Y" }}</a>{% if p.anulado %} <span class="badge text-bg-danger">Anulado</span>{% endif %}<span class="ff-num">{{ p.total|dinero:cuenta.moneda }}</span></li>
+          {% empty %}<li class="list-group-item text-body-secondary">Sin pagos.</li>{% endfor %}
+        </ul>
+      </div>
+      <details class="small"><summary>Historial de condiciones ({{ condiciones|length }})</summary>
+        <ul class="mt-2">{% for c in condiciones %}<li>v{{ c.version }}: {{ c.tasa_valor|tasa }} {{ c.get_tasa_tipo_display|lower }}, límite {{ c.limite|dinero:cuenta.moneda }}, desde {{ c.vigente_desde|date:"d/m/Y H:i" }}{% if c.vigente_hasta %} hasta {{ c.vigente_hasta|date:"d/m/Y H:i" }}{% endif %}</li>{% endfor %}</ul>
+      </details>
+    </div>
+  </div>
+{% endblock %}

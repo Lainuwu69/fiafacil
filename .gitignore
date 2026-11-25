@@ -1,0 +1,26 @@
+# Secretos y entorno local
+.env
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Respaldos de la base de datos (contienen datos personales) y registros de ejecución
+respaldos/
+logs/
+entrega/
+
+# Django
+media/
+media_pruebas/
+staticfiles/
+*.log
+
+# Editores y sistema
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Tienda pendiente de activación{% endblock %}
+{% block contenido %}
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 text-center">
+          <i class="bi bi-hourglass-split display-4 text-warning" aria-hidden="true"></i>
+          <h1 class="h4 mt-3">Tu tienda está pendiente de activación</h1>
+          {% if request.tienda %}
+            <p class="mb-1"><strong>{{ request.tienda.codigo }} · {{ request.tienda.nombre }}</strong> ({{ request.tienda.giro }})</p>
+          {% endif %}
+          <p class="text-body-secondary">Ya iniciaste sesión correctamente. El administrador de la plataforma debe activar tu tienda antes de que puedas
+            registrar artículos, clientes y ventas al crédito. Esta página se actualizará cuando la tienda esté activa.</p>
+          <a href="{% url 'core:inicio' %}" class="btn btn-primary"><i class="bi bi-arrow-clockwise"></i> Volver a revisar</a>
+          {% if soporte_correo %}<p class="small mt-3 mb-0">¿Demora? Escríbenos a <a href="mailto:{{ soporte_correo }}">{{ soporte_correo }}</a>.</p>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block titulo %}Sin permisos asignados{% endblock %}
+{% block contenido %}
+  <div class="alert alert-info">
+    <h1 class="h5">Tu usuario aún no tiene una tienda ni una cuenta de cliente</h1>
+    <p class="mb-0">Si eres cliente, pide al negocio que vincule tu correo a tu cuenta. Si tienes un negocio, <a href="{% url 'cuentas:registro' %}">regístralo aquí</a>.</p>
+  </div>
+{% endblock %}

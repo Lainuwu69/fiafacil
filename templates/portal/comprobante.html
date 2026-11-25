@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titulo %}Comprobante {{ pago.numero|stringformat:"06d" }}{% endblock %}
+{% block contenido %}
+  <div class="d-flex justify-content-between align-items-center mb-3 d-print-none">
+    <a href="{% url 'core:portal_cuenta' pago.cuenta.pk %}"><i class="bi bi-arrow-left"></i> Volver a mi cuenta</a>
+    <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
+  </div>
+  {% include "parciales/comprobante_cuerpo.html" %}
+{% endblock %}

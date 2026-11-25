@@ -1,0 +1,18 @@
+{% extends "base_auth.html" %}
+{% load ff %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block contenido %}
+  <h1 class="h4 mb-3">Iniciar sesión</h1>
+  <form method="post" novalidate data-un-envio>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger" role="alert">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+    {% endif %}
+    {% campo form.username %}
+    {% campo form.password %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn btn-primary w-100 btn-lg"><i class="bi bi-box-arrow-in-right"></i> Ingresar</button>
+  </form>
+  <hr>
+  <p class="text-center mb-0">¿Tienes un negocio y aún no usas FíaFácil?<br><a href="{% url 'cuentas:registro' %}" class="fw-semibold">Registra tu negocio gratis</a></p>
+{% endblock %}

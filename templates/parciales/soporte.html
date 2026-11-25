@@ -1,0 +1,7 @@
+{% comment %}Botón flotante de soporte por WhatsApp (punto 9d: canal de asistencia técnica).{% endcomment %}
+{% if soporte_whatsapp %}
+  <a class="ff-whatsapp btn btn-success rounded-circle shadow" href="https://wa.me/{{ soporte_whatsapp }}?text=Hola%2C%20necesito%20ayuda%20con%20F%C3%ADaF%C3%A1cil"
+     target="_blank" rel="noopener" title="Soporte por WhatsApp" aria-label="Escribir a soporte por WhatsApp">
+    <i class="bi bi-whatsapp fs-4" aria-hidden="true"></i>
+  </a>
+{% endif %}

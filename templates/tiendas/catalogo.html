@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}Catálogo{% endblock %}
+{% block contenido %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h3 mb-0">Catálogo de productos y servicios</h1>
+      <p class="text-body-secondary mb-0">Lo que vendes al crédito, con su precio contado y su precio de lista. No se lleva stock.</p>
+    </div>
+    <a href="{% url 'tiendas:articulo_nuevo' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo artículo</a>
+  </div>
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-sm-6 col-md-4"><input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Buscar por descripción, marca o proveedor" aria-label="Buscar"></div>
+    <div class="col-auto">
+      <select name="ver" class="form-select" onchange="this.form.submit()" aria-label="Filtrar">
+        <option value="activos" {% if ver == 'activos' %}selected{% endif %}>Activos</option>
+        <option value="baja" {% if ver == 'baja' %}selected{% endif %}>Dados de baja</option>
+        <option value="todos" {% if ver == 'todos' %}selected{% endif %}>Todos</option>
+      </select>
+    </div>
+    <div class="col-auto"><button class="btn btn-outline-primary"><i class="bi bi-search"></i> Buscar</button></div>
+  </form>
+  <div class="row g-3">
+    {% for a in articulos %}
+      <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
+        <div class="card h-100 border-0 shadow-sm {% if not a.activo %}opacity-50{% endif %}">
+          <img src="{{ a.imagen.url }}" class="card-img-top object-fit-cover" style="height: 160px" alt="Imagen de {{ a.descripcion }}">
+          <div class="card-body">
+            <h2 class="h6 mb-1">{{ a.descripcion }}</h2>
+            <p class="small text-body-secondary mb-2">{{ a.get_unidad_display }}{% if a.marca %} · {{ a.marca }}{% endif %}{% if a.proveedor %} · Prov.: {{ a.proveedor }}{% endif %}</p>
+            <div class="d-flex justify-content-between small">
+              <span>Contado <strong>{{ a.precio_contado|dinero }}</strong></span>
+              <span>Lista <strong>{{ a.precio_credito|dinero }}</strong></span>
+            </div>
+            <div class="mt-2">
+              {% if a.permite_mensual %}<span class="badge text-bg-light border">Fin de mes</span>{% endif %}
+              {% if a.permite_cuotas %}<span class="badge text-bg-light border">Cuotas</span>{% endif %}
+              {% if not a.activo %}<span class="badge text-bg-secondary">Dado de baja</span>{% endif %}
+            </div>
+          </div>
+          <div class="card-footer bg-transparent border-0 d-flex gap-2">
+            <a href="{% url 'tiendas:articulo_editar' a.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Editar</a>
+            <form method="post" action="{% url 'tiendas:articulo_estado' a.pk %}">{% csrf_token %}
+              {% if a.activo %}<button class="btn btn-sm btn-outline-danger" title="Baja lógica: las ventas pasadas lo conservan"><i class="bi bi-slash-circle"></i> Dar de baja</button>
+              {% else %}<button class="btn btn-sm btn-outline-success"><i class="bi bi-arrow-counterclockwise"></i> Reactivar</button>{% endif %}
+            </form>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12"><div class="alert alert-info">Aún no hay artículos aquí. <a href="{% url 'tiendas:articulo_nuevo' %}">Registra el primero</a>.</div></div>
+    {% endfor %}
+  </div>
+{% endblock %}

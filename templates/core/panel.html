@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}Panel{% endblock %}
+{% block contenido %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div><h1 class="h3 mb-0">Panel de {{ request.tienda.nombre }}</h1><p class="text-body-secondary mb-0">Situación de tu cartera al {{ hoy|date:"d/m/Y" }}.</p></div>
+    <div class="d-flex gap-2"><a href="{% url 'creditos:nueva_venta' %}" class="btn btn-primary"><i class="bi bi-cart-plus"></i> Nueva venta</a>
+      <a href="{% url 'clientes:lista' %}" class="btn btn-outline-primary"><i class="bi bi-cash-coin"></i> Cobrar</a></div>
+  </div>
+  {% if estados_pendientes %}<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> Hay {{ estados_pendientes }} ciclo{{ estados_pendientes|pluralize }} con el corte cumplido sin estado de cuenta. <a href="{% url 'creditos:estados' %}">Generarlos</a>.</div>{% endif %}
+
+  {% for moneda, i in indicadores.items %}
+    {% if indicadores|length > 1 %}<h2 class="h5 mt-2">{{ moneda }}</h2>{% endif %}
+    <div class="row g-3 mb-3">
+      <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm h-100 ff-tarjeta-indicador"><div class="card-body">
+        <div class="small text-body-secondary">Capital por cobrar <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Capital de trabajo inmovilizado en cuentas por cobrar: mercadería entregada que aún no vuelve como efectivo (apartado 2.6)."></i></div>
+        <div class="valor">{{ i.capital|dinero:moneda }}</div></div></div></div>
+      <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm h-100 ff-tarjeta-indicador"><div class="card-body">
+        <div class="small text-body-secondary">Total con intereses <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Capital + intereses compensatorios de lo pendiente (sin mora)."></i></div>
+        <div class="valor">{{ i.total|dinero:moneda }}</div><div class="small text-body-secondary">Intereses {{ i.interes|dinero:moneda }}</div></div></div></div>
+      <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm h-100 ff-tarjeta-indicador"><div class="card-body">
+        <div class="small text-body-secondary">Vencido <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Obligaciones pendientes cuya fecha de pago ya pasó."></i></div>
+        <div class="valor {% if i.vencido > 0 %}text-danger{% endif %}">{{ i.vencido|dinero:moneda }}</div><div class="small text-body-secondary">{{ i.clientes_en_mora }} cliente{{ i.clientes_en_mora|pluralize }} en mora</div></div></div></div>
+      <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm h-100 ff-tarjeta-indicador"><div class="card-body">
+        <div class="small text-body-secondary">Índice de morosidad <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Vencido ÷ Total por cobrar. Referencia: la cartera MYPE del sistema financiero tuvo 5.6 % a marzo de 2026 (Universidad de Lima, 2026)."></i></div>
+        <div class="valor">{{ i.morosidad|porcentaje }}</div></div></div></div>
+      <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm h-100 ff-tarjeta-indicador"><div class="card-body">
+        <div class="small text-body-secondary">Periodo promedio de cobro <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Capital por cobrar ÷ ventas al crédito de los últimos 90 días × 90. Cuántos días tarda en volver el dinero fiado."></i></div>
+        <div class="valor">{% if i.ppc_dias is not None %}{{ i.ppc_dias }} días{% else %}—{% endif %}</div></div></div></div>
+      <div class="col-6 col-xl-2"><div class="card border-0 shadow-sm h-100 ff-tarjeta-indicador"><div class="card-body">
+        <div class="small text-body-secondary">Cobrado este mes</div>
+        <div class="valor text-success">{{ i.cobrado_mes|dinero:moneda }}</div><div class="small text-body-secondary">{{ i.clientes_con_deuda }} cliente{{ i.clientes_con_deuda|pluralize }} con deuda</div></div></div></div>
+    </div>
+  {% empty %}
+    <div class="alert alert-info">Aún no tienes clientes. Empieza registrando tu <a href="{% url 'tiendas:articulo_nuevo' %}">catálogo</a> y tus <a href="{% url 'clientes:nuevo' %}">clientes</a>.</div>
+  {% endfor %}
+
+  <div class="row g-3">
+    <div class="col-xl-7">
+      <div class="card border-0 shadow-sm h-100"><div class="card-header bg-white"><h2 class="h6 mb-0">Flujo de caja proyectado de cobranzas
+        <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Lo que se espera cobrar cada mes según los vencimientos pendientes (capital + interés, sin mora)."></i></h2></div>
+        <div class="card-body">
+          {% for moneda, filas in flujo.items %}
+            {% if flujo|length > 1 %}<h3 class="h6">{{ moneda }}</h3>{% endif %}
+            <table class="table table-sm align-middle">
+              <thead><tr><th>Mes</th><th style="width: 40%"></th><th class="text-end">Capital</th><th class="text-end">Interés</th><th class="text-end">Total</th></tr></thead>
+              <tbody>{% for f in filas %}<tr class="{% if f.vencido and f.total > 0 %}table-danger{% endif %}">
+                <td class="text-nowrap">{{ f.etiqueta }}</td>
+                <td><div class="progress" role="img" aria-label="{{ f.etiqueta }}: {{ f.total }}" style="height: .7rem"><div class="progress-bar {% if f.vencido %}bg-danger{% endif %}" style="width: {{ f.ancho }}%"></div></div></td>
+                <td class="ff-num">{{ f.capital|dinero:moneda }}</td><td class="ff-num">{{ f.interes|dinero:moneda }}</td><td class="ff-num fw-semibold">{{ f.total|dinero:moneda }}</td></tr>{% endfor %}</tbody>
+            </table>
+          {% empty %}<p class="text-body-secondary mb-0">Sin cobranzas pendientes.</p>{% endfor %}
+        </div></div>
+    </div>
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm mb-3"><div class="card-header bg-white"><h2 class="h6 mb-0 text-danger">Obligaciones vencidas</h2></div>
+        <ul class="list-group list-group-flush small">{% for o in vencidas %}
+          <li class="list-group-item d-flex justify-content-between"><a href="{% url 'creditos:pago' o.cuenta.pk %}">{{ o.cuenta.codigo }} {{ o.cuenta.nombre }} · venció {{ o.vencimiento|date:"d/m/Y" }}</a><span class="ff-num">{{ o.total|dinero:o.cuenta.moneda }}</span></li>
+        {% empty %}<li class="list-group-item text-body-secondary">No hay deudas vencidas.</li>{% endfor %}</ul></div>
+      <div class="card border-0 shadow-sm"><div class="card-header bg-white"><h2 class="h6 mb-0">Próximos vencimientos (15 días)</h2></div>
+        <ul class="list-group list-group-flush small">{% for o in proximos %}
+          <li class="list-group-item d-flex justify-content-between"><a href="{% url 'clientes:detalle' o.cuenta.pk %}">{{ o.vencimiento|date:"d/m/Y" }} · {{ o.cuenta.codigo }} {{ o.cuenta.nombre }}</a><span class="ff-num">{{ o.total|dinero:o.cuenta.moneda }}</span></li>
+        {% empty %}<li class="list-group-item text-body-secondary">Nada vence en los próximos 15 días.</li>{% endfor %}</ul></div>
+    </div>
+  </div>
+{% endblock %}

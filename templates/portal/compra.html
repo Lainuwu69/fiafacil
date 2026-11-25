@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}Compra N° {{ compra.numero }}{% endblock %}
+{% block contenido %}
+  <nav aria-label="Ruta"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'core:portal' %}">Mis cuentas</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'core:portal_cuenta' compra.cuenta.pk %}">{{ compra.tienda.nombre }}</a></li><li class="breadcrumb-item active">Compra N° {{ compra.numero }}</li></ol></nav>
+  <h1 class="h4">Compra N° {{ compra.numero }} del {{ compra.fecha_compra|date:"d/m/Y H:i" }}{% if compra.anulada %} <span class="badge text-bg-danger">Anulada: no se cobra</span>{% endif %}</h1>
+  <p class="text-body-secondary">{{ compra.get_modalidad_display }}{% if compra.modalidad == 'CUOTAS' %} · {{ compra.n_cuotas }} cuotas de {{ compra.cuota|dinero:m }}{% else %} · vence el {{ compra.fecha_pago|date:"d/m/Y" }}{% endif %}</p>
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm mb-3"><div class="card-body"><dl class="row small mb-0">
+        <dt class="col-7">Lo que compraste</dt><dd class="col-5 ff-num">{{ compra.capital|dinero:m }}</dd>
+        <dt class="col-7">Intereses</dt><dd class="col-5 ff-num">{{ compra.interes|dinero:m }}</dd>
+        <dt class="col-7">Total a pagar</dt><dd class="col-5 ff-num fw-bold">{{ compra.total|dinero:m }}</dd>
+        <dt class="col-7">Costo efectivo anual (TCEA) <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Cuánto te cuesta realmente el crédito al año, considerando todos tus pagos."></i></dt><dd class="col-5 ff-num">{{ compra.tcea|tasa:2 }}</dd>
+      </dl></div></div>
+      <div class="card border-0 shadow-sm mb-3"><div class="table-responsive"><table class="table table-sm mb-0">
+        <thead><tr><th>Artículo</th><th class="text-end">Cant.</th><th class="text-end">Importe</th></tr></thead>
+        <tbody>{% for d in detalles %}<tr><td>{{ d.descripcion }}</td><td class="ff-num">{{ d.cantidad|floatformat:"-3" }}</td><td class="ff-num">{{ d.importe|dinero:m }}</td></tr>{% endfor %}</tbody>
+      </table></div></div>
+    </div>
+    <div class="col-lg-7"><div class="card border-0 shadow-sm"><div class="card-header bg-white"><h2 class="h6 mb-0">{% if compra.modalidad == 'CUOTAS' %}Tu cronograma de cuotas{% else %}Tu pago{% endif %}</h2></div>
+      {% include "parciales/cronograma.html" %}</div></div>
+  </div>
+{% endblock %}

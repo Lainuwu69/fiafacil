@@ -1,0 +1,30 @@
+{% load ff %}
+{% comment %}Comprobante de pago. Espera: pago, aplicaciones.{% endcomment %}
+{% with m=pago.moneda %}
+<div class="card border-0 shadow-sm mx-auto" style="max-width: 760px"><div class="card-body p-4">
+  <div class="d-flex justify-content-between flex-wrap gap-2 border-bottom pb-3 mb-3">
+    <div><div class="h5 mb-0">{{ pago.tienda.nombre }}</div><div class="small text-body-secondary">{{ pago.tienda.direccion }}{% if pago.tienda.ruc %} · RUC {{ pago.tienda.ruc }}{% endif %}</div></div>
+    <div class="text-end"><div class="h5 mb-0">Comprobante de pago</div><div class="fw-semibold">N° {{ pago.numero|stringformat:"06d" }}</div>
+      {% if pago.anulado %}<div class="badge text-bg-danger fs-6 mt-1">ANULADO</div>{% endif %}</div>
+  </div>
+  <dl class="row small">
+    <dt class="col-sm-4">Cliente</dt><dd class="col-sm-8">{{ pago.cuenta.codigo }} {{ pago.cuenta.nombre }} ({{ pago.cuenta.tipo_documento }} {{ pago.cuenta.documento }})</dd>
+    <dt class="col-sm-4">Fecha efectiva de pago</dt><dd class="col-sm-8">{{ pago.fecha_efectiva|date:"d/m/Y" }}</dd>
+    <dt class="col-sm-4">Registrado</dt><dd class="col-sm-8">{{ pago.registrado_en|date:"d/m/Y H:i" }}</dd>
+  </dl>
+  <div class="table-responsive"><table class="table table-sm">
+    <thead><tr><th>Obligación cancelada</th><th>Vencía</th><th class="text-end">Días mora</th><th class="text-end">Mora</th><th class="text-end">Interés</th><th class="text-end">Capital</th><th class="text-end">Total</th></tr></thead>
+    <tbody>{% for a in aplicaciones %}<tr><td>{{ a.obligacion.get_tipo_display }}{% if a.obligacion.tipo == 'CUOTA' %} {{ a.obligacion.numero }}{% endif %} · compra N° {{ a.obligacion.compra.numero }}</td>
+      <td>{{ a.obligacion.vencimiento|date:"d/m/Y" }}</td><td class="ff-num">{{ a.dias_mora }}</td><td class="ff-num">{{ a.mora|dinero:m }}</td><td class="ff-num">{{ a.interes|dinero:m }}</td><td class="ff-num">{{ a.capital|dinero:m }}</td><td class="ff-num">{{ a.total|dinero:m }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <div class="row justify-content-end"><div class="col-sm-7">
+    <table class="table table-sm mb-0">
+      <tr><td>1. Intereses por mora</td><td class="ff-num">{{ pago.mora|dinero:m }}</td></tr>
+      <tr><td>2. Interés compensatorio</td><td class="ff-num">{{ pago.interes|dinero:m }}</td></tr>
+      <tr><td>3. Capital</td><td class="ff-num">{{ pago.capital|dinero:m }}</td></tr>
+      <tr class="fw-bold fs-5"><td>Total pagado</td><td class="ff-num">{{ pago.total|dinero:m }}</td></tr>
+    </table>
+  </div></div>
+  <p class="small text-body-secondary mt-3 mb-0">El pago se aplicó en el orden mora → interés compensatorio → capital (Anexo A). Documento de control interno; no es un comprobante tributario.</p>
+</div></div>
+{% endwith %}

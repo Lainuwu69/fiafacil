@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load ff static %}
+{% block titulo %}Registrar pago · {{ cuenta.codigo }}{% endblock %}
+{% block contenido %}
+  {% with m=cuenta.moneda %}
+  <nav aria-label="Ruta"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'clientes:lista' %}">Clientes</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'clientes:detalle' cuenta.pk %}">{{ cuenta.codigo }} {{ cuenta.nombre }}</a></li><li class="breadcrumb-item active">Pago</li></ol></nav>
+  <h1 class="h3">Registrar pago</h1>
+  <p class="text-body-secondary">Elige las obligaciones que el cliente cancela y la fecha en que pagó. El servidor calcula la mora (si pagó tarde) y el total exacto. <strong>No se aceptan pagos parciales.</strong></p>
+  <form method="post" id="form-pago" novalidate data-un-envio data-api="{% url 'creditos:api_calcular_pago' cuenta.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="clave" value="{{ clave }}">
+    <div class="row g-3">
+      <div class="col-xl-7">
+        <div class="card border-0 shadow-sm"><div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h2 class="h6 mb-0">Obligaciones pendientes</h2>
+          <button type="button" class="btn btn-sm btn-link" id="marcar-vencidas">Marcar las vencidas</button></div>
+          <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+            <thead><tr><th></th><th>Vence</th><th>Concepto</th><th class="text-end">Capital</th><th class="text-end">Interés</th><th class="text-end">Total</th></tr></thead>
+            <tbody>
+              {% for o in pendientes %}<tr class="{% if o.vencimiento < hoy %}table-danger{% endif %}">
+                <td><input class="form-check-input" type="checkbox" name="obligacion" value="{{ o.pk }}" id="o-{{ o.pk }}" data-vencida="{% if o.vencimiento < hoy %}1{% endif %}" {% if o.pk|stringformat:'s' in seleccion %}checked{% endif %} aria-label="Pagar {{ o }}"></td>
+                <td><label for="o-{{ o.pk }}">{{ o.vencimiento|date:"d/m/Y" }}</label></td>
+                <td>{% if o.tipo == 'CUOTA' %}Cuota {{ o.numero }}/{{ o.compra.n_cuotas }}{% else %}Pago mensual{% endif %} · compra N° {{ o.compra.numero }}</td>
+                <td class="ff-num">{{ o.capital|dinero:m }}</td><td class="ff-num">{{ o.interes|dinero:m }}</td><td class="ff-num">{{ o.total|dinero:m }}</td></tr>
+              {% empty %}<tr><td colspan="6" class="text-center text-body-secondary py-4">El cliente no tiene deudas pendientes.</td></tr>{% endfor %}
+            </tbody>
+          </table></div></div>
+      </div>
+      <div class="col-xl-5">
+        <div class="card border-0 shadow-sm"><div class="card-body">
+          <div class="mb-3">
+            <label for="fecha_efectiva" class="form-label fw-semibold">Fecha efectiva del pago <span class="text-danger">*</span></label>
+            <button type="button" class="btn btn-link p-0 ms-1 ff-ayuda" data-bs-toggle="tooltip" title="Día en que el cliente pagó. Si es posterior al vencimiento, se cobra mora por esos días. No puede ser futura."><i class="bi bi-info-circle"></i></button>
+            <input type="date" id="fecha_efectiva" name="fecha_efectiva" value="{{ fecha }}" max="{{ hoy|date:'Y-m-d' }}" class="form-control" aria-describedby="ayuda-fp">
+            <div id="ayuda-fp" class="form-text">Ej.: 01/10/2026. Por defecto, hoy.</div>
+          </div>
+          <div id="liquidacion" aria-live="polite"><p class="text-body-secondary small">Marca al menos una obligación para ver el total.</p></div>
+          <div class="mb-3">
+            <label for="importe" class="form-label fw-semibold">Importe recibido ({{ cuenta.get_moneda_display }}) <span class="text-danger">*</span></label>
+            <button type="button" class="btn btn-link p-0 ms-1 ff-ayuda" data-bs-toggle="tooltip" title="Debe ser exactamente el total calculado (RN07). Un monto menor o mayor se rechaza."><i class="bi bi-info-circle"></i></button>
+            <div class="input-group">
+              <input type="number" id="importe" name="importe" step="0.01" min="0.01" value="{{ importe }}" class="form-control" inputmode="decimal" aria-describedby="ayuda-imp">
+              <button type="button" class="btn btn-outline-secondary" id="usar-total" disabled>Usar el total</button>
+            </div>
+            <div id="ayuda-imp" class="form-text">Con punto decimal. Ej.: 201.98.</div>
+          </div>
+          <button type="submit" class="btn btn-success btn-lg w-100"><i class="bi bi-cash-coin"></i> Registrar pago</button>
+        </div></div>
+      </div>
+    </div>
+  </form>
+  {% endwith %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/pago.js' %}"></script>{% endblock %}

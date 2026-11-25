@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}Clientes{% endblock %}
+{% block contenido %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div><h1 class="h3 mb-0">Clientes</h1><p class="text-body-secondary mb-0">Cuentas corrientes de tus vecinos, con su deuda y su crédito disponible.</p></div>
+    <a href="{% url 'clientes:nuevo' %}" class="btn btn-primary"><i class="bi bi-person-plus"></i> Nuevo cliente</a>
+  </div>
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-sm-6 col-md-4"><input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Nombre, documento o código" aria-label="Buscar"></div>
+    <div class="col-auto"><select name="ver" class="form-select" onchange="this.form.submit()" aria-label="Filtrar">
+      <option value="activos" {% if ver == 'activos' %}selected{% endif %}>Activos</option>
+      <option value="baja" {% if ver == 'baja' %}selected{% endif %}>Dados de baja</option>
+      <option value="todos" {% if ver == 'todos' %}selected{% endif %}>Todos</option></select></div>
+    <div class="col-auto"><button class="btn btn-outline-primary"><i class="bi bi-search"></i> Buscar</button></div>
+  </form>
+  <div class="card border-0 shadow-sm"><div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light"><tr><th>Código</th><th>Cliente</th><th>Documento</th><th>Moneda</th><th class="text-end">Deuda pendiente</th><th class="text-end">Disponible</th><th></th></tr></thead>
+      <tbody>
+        {% for f in filas %}
+          <tr>
+            <td class="fw-semibold">{{ f.cuenta.codigo }}</td>
+            <td>{{ f.cuenta.nombre }}{% if not f.cuenta.activo %} <span class="badge text-bg-secondary">Baja</span>{% endif %}{% if f.cuenta.usuario %} <i class="bi bi-person-check text-success" title="Tiene acceso al portal"></i>{% endif %}</td>
+            <td>{{ f.cuenta.tipo_documento }} {{ f.cuenta.documento }}</td>
+            <td>{{ f.cuenta.moneda }}</td>
+            <td class="ff-num">{{ f.deuda|dinero:f.cuenta.moneda }}</td>
+            <td class="ff-num">{{ f.disponible|dinero:f.cuenta.moneda }}</td>
+            <td class="text-end text-nowrap">
+              <a href="{% url 'clientes:detalle' f.cuenta.pk %}" class="btn btn-sm btn-outline-primary">Ver</a>
+              {% if f.cuenta.activo %}<a href="{% url 'creditos:nueva_venta' %}?cuenta={{ f.cuenta.pk }}" class="btn btn-sm btn-primary"><i class="bi bi-cart-plus"></i> Vender</a>{% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-center text-body-secondary py-4">No hay clientes. <a href="{% url 'clientes:nuevo' %}">Registra el primero</a>.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+{% endblock %}

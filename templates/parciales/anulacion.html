@@ -1,0 +1,32 @@
+{% comment %}
+Bloque de anulación (corrección trazable de un error de registro; sección 5.3 del informe).
+Espera: anulacion (o None), no_anulable (texto o None), url_anular, que ("la venta" / "el pago"), motivo_minimo.
+{% endcomment %}
+{% if anulacion %}
+  <div class="alert alert-danger d-flex gap-2" role="alert">
+    <i class="bi bi-x-octagon fs-4" aria-hidden="true"></i>
+    <div><strong>ANULAD{% if que == "el pago" %}O{% else %}A{% endif %}</strong> el {{ anulacion.registrada_en|date:"d/m/Y H:i" }} por {{ anulacion.registrada_por.email }}.
+      <div class="small">Motivo: {{ anulacion.motivo }}</div>
+      <div class="small text-body-secondary">El registro original se conserva (RN09); solo deja de cobrarse.</div></div>
+  </div>
+{% elif request.membresia.rol == "NEGOCIO" %}
+  <details class="card border-0 shadow-sm mb-3 d-print-none">
+    <summary class="card-header bg-white text-danger"><i class="bi bi-x-octagon"></i> Anular {{ que }} (solo para corregir un error de registro)</summary>
+    <div class="card-body">
+      {% if no_anulable %}
+        <p class="small text-body-secondary mb-0"><i class="bi bi-info-circle"></i> No se puede anular: {{ no_anulable }}</p>
+      {% else %}
+        <form method="post" action="{{ url_anular }}" data-un-envio
+              onsubmit="return confirm('¿Anular {{ que }}? Quedará registrado con tu usuario y el motivo; no se puede deshacer.');">
+          {% csrf_token %}
+          <label for="motivo" class="form-label fw-semibold">Motivo <span class="text-danger">*</span></label>
+          <button type="button" class="btn btn-link p-0 ms-1 ff-ayuda" data-bs-toggle="tooltip"
+                  title="Explica el error que corriges. Queda en la auditoría. Mínimo {{ motivo_minimo }} caracteres."><i class="bi bi-info-circle"></i></button>
+          <input type="text" id="motivo" name="motivo" class="form-control" minlength="{{ motivo_minimo }}" maxlength="300" required aria-describedby="ayuda-motivo">
+          <div id="ayuda-motivo" class="form-text">Ej.: Se registró 120 unidades en vez de 12.</div>
+          <button type="submit" class="btn btn-outline-danger mt-2"><i class="bi bi-x-octagon"></i> Anular {{ que }}</button>
+        </form>
+      {% endif %}
+    </div>
+  </details>
+{% endif %}

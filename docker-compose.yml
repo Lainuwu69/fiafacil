@@ -1,0 +1,22 @@
+# PostgreSQL opcional con Docker, para quien no quiera instalarlo en Windows.
+# Uso:  docker compose up -d
+# Toma DB_NAME, DB_USER y DB_PASSWORD del archivo .env de esta carpeta.
+# Si ya tienes PostgreSQL instalado en el puerto 5432, no necesitas este archivo.
+services:
+  postgres:
+    image: postgres:16
+    container_name: fiafacil-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-fiafacil}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en .env}
+      TZ: America/Lima
+      PGTZ: America/Lima
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - fiafacil_datos:/var/lib/postgresql/data
+
+volumes:
+  fiafacil_datos:

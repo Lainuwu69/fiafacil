@@ -1,0 +1,38 @@
+{% load static %}<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}FíaFácil{% endblock %} · FíaFácil</title>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/fiafacil.css' %}">
+</head>
+<body class="ff-auth">
+  <main class="container py-4 py-md-5">
+    <div class="row justify-content-center">
+      <div class="{% block ancho %}col-12 col-sm-10 col-md-7 col-lg-5{% endblock %}">
+        <div class="text-center mb-4">
+          <a href="{% url 'core:inicio' %}" class="ff-marca text-decoration-none">
+            <i class="bi bi-journal-check" aria-hidden="true"></i> FíaFácil
+          </a>
+          <p class="text-body-secondary small mb-0">El cuaderno de fiados, ahora con cuentas claras</p>
+        </div>
+        {% include "parciales/mensajes.html" %}
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-4">
+            {% block contenido %}{% endblock %}
+          </div>
+        </div>
+        <p class="text-center small text-body-secondary mt-3">
+          ¿Necesitas ayuda? <a href="{% url 'core:ayuda' %}">Centro de ayuda</a>
+          {% if soporte_correo %} · <a href="mailto:{{ soporte_correo }}">{{ soporte_correo }}</a>{% endif %}
+        </p>
+      </div>
+    </div>
+  </main>
+  {% include "parciales/soporte.html" %}
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/fiafacil.js' %}"></script>
+</body>
+</html>

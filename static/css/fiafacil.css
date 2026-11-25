@@ -1,0 +1,56 @@
+/* Estilos propios de FíaFácil (sobre Bootstrap 5.3). */
+:root {
+  --ff-primario: #0f766e;      /* verde azulado: confianza y dinero */
+  --ff-primario-oscuro: #115e59;
+  --ff-fondo: #f5f7f6;
+  --bs-primary: #0f766e;
+  --bs-primary-rgb: 15, 118, 110;
+  --bs-link-color: #0f766e;
+  --bs-link-hover-color: #115e59;
+}
+
+body { background: var(--ff-fondo); }
+
+.btn-primary { --bs-btn-bg: var(--ff-primario); --bs-btn-border-color: var(--ff-primario);
+  --bs-btn-hover-bg: var(--ff-primario-oscuro); --bs-btn-hover-border-color: var(--ff-primario-oscuro);
+  --bs-btn-active-bg: var(--ff-primario-oscuro); }
+.btn-outline-primary { --bs-btn-color: var(--ff-primario); --bs-btn-border-color: var(--ff-primario);
+  --bs-btn-hover-bg: var(--ff-primario); --bs-btn-hover-border-color: var(--ff-primario); }
+
+.nav-pills { --bs-nav-pills-link-active-bg: var(--ff-primario); --bs-nav-link-color: var(--ff-primario);
+  --bs-nav-link-hover-color: var(--ff-primario-oscuro); }
+.form-control:focus, .form-select:focus, .form-check-input:focus { border-color: #5eada5;
+  box-shadow: 0 0 0 .25rem rgba(15, 118, 110, .2); }
+.form-check-input:checked { background-color: var(--ff-primario); border-color: var(--ff-primario); }
+
+.ff-barra { background: var(--ff-primario); }
+.ff-marca { font-size: 2rem; font-weight: 700; color: var(--ff-primario); }
+.ff-auth { background: linear-gradient(160deg, #e6f2f0 0%, var(--ff-fondo) 60%); min-height: 100vh; }
+
+/* Menú lateral */
+@media (min-width: 992px) {
+  .ff-lateral { min-height: calc(100vh - 56px); background: #fff; border-right: 1px solid #e3e7e6; }
+}
+.ff-lateral .nav-link { color: #334155; padding: .55rem 1.25rem; border-left: 3px solid transparent; }
+.ff-lateral .nav-link:hover { background: #eef6f5; }
+.ff-lateral .nav-link.active { color: var(--ff-primario); font-weight: 600; background: #e6f2f0; border-left-color: var(--ff-primario); }
+.ff-lateral .nav-link i { margin-right: .4rem; }
+.ff-seccion { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; padding: .9rem 1.25rem .3rem; }
+
+/* Ayuda por campo */
+.ff-ayuda { color: var(--ff-primario); text-decoration: none; line-height: 1; }
+.ff-ayuda:focus-visible { outline: 2px solid var(--ff-primario); border-radius: 50%; }
+
+/* Botón flotante de WhatsApp */
+.ff-whatsapp { position: fixed; right: 1.25rem; bottom: 1.25rem; width: 3.5rem; height: 3.5rem;
+  display: flex; align-items: center; justify-content: center; z-index: 1050; }
+
+/* Números alineados en tablas financieras */
+.ff-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ff-tarjeta-indicador .valor { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.ff-mensajes .alert { margin-bottom: .75rem; }
+
+/* Centro de ayuda: que la barra superior fija no tape el título al saltar a una sección. */
+.ff-ayuda-pagina section { scroll-margin-top: 72px; }
+.ff-ayuda-pagina code { color: #0f5132; white-space: nowrap; }

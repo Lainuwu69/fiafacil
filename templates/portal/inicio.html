@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}Mis cuentas{% endblock %}
+{% block contenido %}
+  <h1 class="h3">Hola, {{ user.get_short_name }}</h1>
+  <p class="text-body-secondary">Estas son tus cuentas en los negocios de tu barrio. Aquí solo puedes consultar: para pagar, acércate a la tienda.</p>
+  <div class="row g-3">
+    {% for t in tarjetas %}{% with c=t.cuenta m=t.cuenta.moneda %}
+      <div class="col-12 col-md-6 col-xl-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white">
+            <div class="fw-semibold"><i class="bi bi-shop"></i> {{ c.tienda.nombre }}</div>
+            <div class="small text-body-secondary">Cuenta {{ c.codigo }} · {{ c.get_moneda_display }}{% if not c.activo %} · <span class="text-danger">cerrada</span>{% endif %}</div>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between"><span>Debes</span><strong class="fs-4">{{ t.deuda|dinero:m }}</strong></div>
+            {% if t.vencido %}<div class="alert alert-danger py-1 px-2 small mt-2 mb-0"><i class="bi bi-exclamation-triangle"></i> Tienes {{ t.vencido|dinero:m }} vencido; se cobran intereses por mora por cada día de atraso.</div>{% endif %}
+            {% if t.proxima %}<div class="small mt-2">Próximo pago: <strong>{{ t.monto_proximo|dinero:m }}</strong> el <strong>{{ t.proxima.vencimiento|date:"d/m/Y" }}</strong></div>{% endif %}
+            <div class="d-flex justify-content-between small mt-2"><span>Crédito disponible</span><span class="text-success fw-semibold">{{ t.disponible|dinero:m }}</span></div>
+            {% if t.condicion %}<div class="small text-body-secondary">Límite {{ t.condicion.limite|dinero:m }} · corte el día {{ t.condicion.dia_corte }} · pagas el día {{ t.condicion.dia_pago }}</div>{% endif %}
+          </div>
+          <div class="card-footer bg-transparent border-0"><a href="{% url 'core:portal_cuenta' c.pk %}" class="btn btn-primary w-100">Ver detalle</a></div>
+        </div>
+      </div>
+    {% endwith %}{% empty %}
+      <div class="col-12"><div class="alert alert-info">Aún no tienes cuentas vinculadas a tu usuario. Pide a la tienda que registre tu correo.</div></div>
+    {% endfor %}
+  </div>
+{% endblock %}

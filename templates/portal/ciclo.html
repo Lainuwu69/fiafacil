@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Estado de cuenta{% endblock %}
+{% block contenido %}
+  <nav aria-label="Ruta" class="d-print-none"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'core:portal' %}">Mis cuentas</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'core:portal_cuenta' cuenta.pk %}">{{ cuenta.tienda.nombre }}</a></li><li class="breadcrumb-item active">Estado de cuenta</li></ol></nav>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-0">Estado de cuenta · corte {{ r.corte|date:"d/m/Y" }}</h1>
+      <p class="mb-0">{{ cuenta.tienda.nombre }} · {{ cuenta.codigo }} {{ cuenta.nombre }}</p>
+      <p class="mb-0">Debes pagar el <strong>{{ r.fecha_pago|date:"d/m/Y" }}</strong>{% if not r.estado %} <span class="badge text-bg-light border">{% if r.corte > ahora %}ciclo en curso: puede cambiar con nuevas compras{% else %}corte cumplido: la tienda aún no emite el estado{% endif %}</span>{% endif %}</p>
+    </div>
+    <button class="btn btn-outline-secondary d-print-none" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
+  </div>
+  {% include "parciales/estado_tabla.html" %}
+{% endblock %}

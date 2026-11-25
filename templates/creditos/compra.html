@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}Compra N° {{ compra.numero }}{% endblock %}
+{% block contenido %}
+  {% with m=compra.moneda %}
+  <nav aria-label="Ruta"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'creditos:compras' %}">Compras</a></li><li class="breadcrumb-item active">N° {{ compra.numero }}</li></ol></nav>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h3 mb-0">Compra N° {{ compra.numero }} · {{ compra.get_modalidad_display }}{% if compra.anulada %} <span class="badge text-bg-danger">Anulada</span>{% endif %}</h1>
+      <p class="text-body-secondary mb-0"><a href="{% url 'clientes:detalle' compra.cuenta.pk %}">{{ compra.cuenta.codigo }} {{ compra.cuenta.nombre }}</a> · {{ compra.fecha_compra|date:"d/m/Y H:i" }} · registrada el {{ compra.registrada_en|date:"d/m/Y H:i" }} por {{ compra.registrada_por.email }}</p>
+    </div>
+    <button class="btn btn-outline-secondary d-print-none" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
+  </div>
+  {% url 'creditos:anular_compra' compra.pk as url_anular %}
+  {% include "parciales/anulacion.html" with que="la venta" %}
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+        <h2 class="h6">Resumen</h2>
+        <dl class="row small mb-0">
+          <dt class="col-7">Capital (precio de lista)</dt><dd class="col-5 ff-num">{{ compra.capital|dinero:m }}</dd>
+          <dt class="col-7">Corte asignado</dt><dd class="col-5 ff-num">{{ compra.corte|date:"d/m/Y H:i" }}</dd>
+          <dt class="col-7">{% if compra.modalidad == 'CUOTAS' %}Fin de la gracia (G){% else %}Vencimiento{% endif %}</dt><dd class="col-5 ff-num">{{ compra.fecha_pago|date:"d/m/Y" }}</dd>
+          <dt class="col-7">{% if compra.modalidad == 'CUOTAS' %}Días de gracia{% else %}Días financiados{% endif %}</dt><dd class="col-5 ff-num">{{ compra.dias }}</dd>
+          <dt class="col-7">{% if compra.modalidad == 'CUOTAS' %}TEM{% else %}Tasa del periodo{% endif %}</dt><dd class="col-5 ff-num">{{ compra.tasa_periodo|tasa }}</dd>
+          {% if compra.modalidad == 'CUOTAS' %}
+            <dt class="col-7">Capital tras la gracia (Pg)</dt><dd class="col-5 ff-num">{{ compra.capital_con_gracia|dinero:m }}</dd>
+            <dt class="col-7">Cuota</dt><dd class="col-5 ff-num">{{ compra.cuota|dinero:m }}</dd>
+          {% endif %}
+          <dt class="col-7">Intereses</dt><dd class="col-5 ff-num">{{ compra.interes|dinero:m }}</dd>
+          <dt class="col-7">Total a pagar</dt><dd class="col-5 ff-num fw-bold">{{ compra.total|dinero:m }}</dd>
+          <dt class="col-7">TCEA</dt><dd class="col-5 ff-num">{{ compra.tcea|tasa }}</dd>
+          <dt class="col-7">TCEA sobre precio contado</dt><dd class="col-5 ff-num">{{ compra.tcea_contado|tasa }}</dd>
+        </dl>
+      </div></div>
+      <div class="card border-0 shadow-sm mb-3"><div class="card-body small">
+        <h2 class="h6">Condiciones aplicadas (versión {{ condicion.version }})</h2>
+        Tasa {{ condicion.tasa_valor|tasa }} {{ condicion.get_tasa_tipo_display|lower }} {{ condicion.get_tasa_periodo_display|lower }}{% if condicion.tasa_capitalizacion %}, capitalización {{ condicion.get_tasa_capitalizacion_display|lower }}{% endif %}.
+        Moratoria {{ condicion.mora_valor|tasa }}. Corte día {{ condicion.dia_corte }} a las {{ condicion.hora_corte|time:"H:i" }}; pago día {{ condicion.dia_pago }}.
+        <div class="text-body-secondary mt-1">Si las condiciones del cliente cambian, esta compra conserva estas (RN10).</div>
+      </div></div>
+    </div>
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm mb-3"><div class="card-header bg-white"><h2 class="h6 mb-0">Artículos</h2></div>
+        <div class="table-responsive"><table class="table table-sm mb-0">
+          <thead><tr><th>Descripción</th><th class="text-end">Cantidad</th><th class="text-end">Precio lista</th><th class="text-end">Importe</th></tr></thead>
+          <tbody>{% for d in detalles %}<tr><td>{{ d.descripcion }} <span class="text-body-secondary small">({{ d.unidad }})</span></td><td class="ff-num">{{ d.cantidad|floatformat:"-3" }}</td><td class="ff-num">{{ d.precio_unitario|dinero:m }}</td><td class="ff-num">{{ d.importe|dinero:m }}</td></tr>{% endfor %}</tbody>
+        </table></div></div>
+      <div class="card border-0 shadow-sm"><div class="card-header bg-white"><h2 class="h6 mb-0">{% if compra.modalidad == 'CUOTAS' %}Cronograma (método francés vencido){% else %}Obligación{% endif %}</h2></div>
+        {% include "parciales/cronograma.html" %}</div>
+    </div>
+  </div>
+  {% endwith %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base_auth.html" %}
+{% block titulo %}Acceso denegado{% endblock %}
+{% block contenido %}
+  <div class="text-center">
+    <i class="bi bi-shield-lock display-4 text-danger" aria-hidden="true"></i>
+    <h1 class="h4 mt-3">No tienes permiso para ver esta página</h1>
+    <p class="text-body-secondary">{{ exception|default:"Tu perfil no tiene acceso a esta sección." }} El intento quedó registrado en la auditoría.</p>
+    <a href="{% url 'core:inicio' %}" class="btn btn-primary">Ir a mi inicio</a>
+  </div>
+{% endblock %}

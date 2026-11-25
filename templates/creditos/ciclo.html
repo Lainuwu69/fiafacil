@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load ff %}
+{% block titulo %}Estado de cuenta {{ cuenta.codigo }}{% endblock %}
+{% block contenido %}
+  {% with m=cuenta.moneda %}
+  <nav aria-label="Ruta" class="d-print-none"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'clientes:lista' %}">Clientes</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'clientes:detalle' cuenta.pk %}">{{ cuenta.codigo }}</a></li><li class="breadcrumb-item active">Estado de cuenta</li></ol></nav>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h3 mb-0">Estado de cuenta · corte {{ r.corte|date:"d/m/Y H:i" }}</h1>
+      <p class="mb-0">{{ request.tienda.nombre }} · Cliente <strong>{{ cuenta.codigo }} {{ cuenta.nombre }}</strong> ({{ cuenta.tipo_documento }} {{ cuenta.documento }}) · {{ cuenta.get_moneda_display }}</p>
+      <p class="mb-0">Fecha de pago: <strong>{{ r.fecha_pago|date:"d/m/Y" }}</strong>
+        {% if r.estado %}<span class="badge text-bg-success">Generado el {{ r.estado.generado_en|date:"d/m/Y H:i" }} · importes congelados</span>
+        {% else %}<span class="badge text-bg-warning">Vista previa (aún no generado)</span>{% endif %}</p>
+    </div>
+    <div class="d-flex gap-2 d-print-none">
+      {% if puede_generar %}
+        <form method="post">{% csrf_token %}<button class="btn btn-primary"><i class="bi bi-file-earmark-check"></i> Generar estado</button></form>
+      {% elif not r.estado %}<span class="small text-body-secondary align-self-center">Se podrá generar cuando se cumpla el corte.</span>{% endif %}
+      <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
+    </div>
+  </div>
+
+  {% include "parciales/estado_tabla.html" %}
+  <form class="row g-2 align-items-end d-print-none" method="get">
+    <div class="col-auto"><label for="al" class="form-label small mb-0">Proyectar la mora al día</label>
+      <input type="date" id="al" name="al" value="{{ r.al_dia|date:'Y-m-d' }}" class="form-control form-control-sm" aria-describedby="ayuda-al"></div>
+    <div class="col-auto"><button class="btn btn-sm btn-outline-primary">Calcular</button></div>
+    <div class="col-12"><div id="ayuda-al" class="form-text">La mora aparece como un ítem aparte (requisito 6): se calcula sobre el total que debió pagarse, por los días de atraso, con la tasa moratoria pactada.</div></div>
+  </form>
+  {% if r.pendiente > 0 %}<a href="{% url 'creditos:pago' cuenta.pk %}" class="btn btn-success mt-3 d-print-none"><i class="bi bi-cash-coin"></i> Registrar pago</a>{% endif %}
+  {% endwith %}
+{% endblock %}

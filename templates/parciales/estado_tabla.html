@@ -1,0 +1,17 @@
+{% load ff %}
+{% comment %}Listado de pago de un ciclo (requisito 6). Lo usan el negocio y el portal del cliente.
+Espera: r (resumen_ciclo) y m (moneda).{% endcomment %}
+<div class="card border-0 shadow-sm mb-3"><div class="table-responsive"><table class="table align-middle mb-0">
+  <thead class="table-light"><tr><th>#</th><th>Fecha de compra</th><th>Concepto</th><th class="text-end">Días</th><th class="text-end">Capital</th><th class="text-end">Interés</th><th class="text-end">Total</th></tr></thead>
+  <tbody>
+    {% for l in r.lineas %}<tr class="{% if l.anulada %}text-decoration-line-through text-body-secondary{% endif %}">
+      <td>{{ l.orden }}</td><td>{{ l.fecha_compra|date:"d/m/Y H:i" }}</td><td>{{ l.descripcion }}{% if l.anulada %} <span class="badge text-bg-danger" style="text-decoration: none">anulada: ya no se cobra</span>{% endif %}</td>
+      <td class="ff-num">{{ l.dias|default:"—" }}</td><td class="ff-num">{{ l.capital|dinero:m }}</td><td class="ff-num">{{ l.interes|dinero:m }}</td><td class="ff-num">{{ l.total|dinero:m }}</td></tr>{% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="fw-semibold"><td colspan="4">Total a pagar el {{ r.fecha_pago|date:"d/m/Y" }}</td><td class="ff-num">{{ r.capital|dinero:m }}</td><td class="ff-num">{{ r.interes|dinero:m }}</td><td class="ff-num">{{ r.total|dinero:m }}</td></tr>
+    {% if r.hay_anuladas %}<tr class="table-info"><td colspan="6">Después de las anulaciones, <strong>queda por cobrar</strong> de este ciclo (sin mora)</td><td class="ff-num fw-semibold">{{ r.pendiente|dinero:m }}</td></tr>{% endif %}
+    {% if r.mora_pagada > 0 %}<tr class="table-warning"><td colspan="6"><strong>Intereses por mora</strong> (ya cobrados en los pagos)</td><td class="ff-num">{{ r.mora_pagada|dinero:m }}</td></tr>{% endif %}
+    {% if r.mora_proyectada > 0 %}<tr class="table-danger"><td colspan="6"><strong>Intereses por mora</strong> proyectados al {{ r.al_dia|date:"d/m/Y" }} ({{ r.dias_atraso }} días de atraso sobre el total vencido)</td><td class="ff-num">{{ r.mora_proyectada|dinero:m }}</td></tr>{% endif %}
+  </tfoot>
+</table></div></div>
