@@ -4,6 +4,8 @@
 
 Trabajo final del curso SI642 Finanzas e Ingeniería Económica (UPC, 2026-20), Grupo 6, sección 7696.
 
+**Repositorio:** <https://github.com/Lainuwu69/fiafacil>
+
 ## Qué hace
 
 - **Plataforma:** el administrador activa o da de baja las tiendas que se registran.
@@ -42,6 +44,11 @@ Trabajo final del curso SI642 Finanzas e Ingeniería Económica (UPC, 2026-20), 
 - `.env` (contraseñas): cada uno crea el suyo;
 - `.venv`: se instala en cada computadora;
 - los respaldos y las imágenes subidas: se regeneran.
+
+**Con GitHub (más simple):** cada integrante descarga el proyecto desde <https://github.com/Lainuwu69/fiafacil>, con **Code → Download ZIP** o con:
+```powershell
+git clone https://github.com/Lainuwu69/fiafacil.git
+```
 
 **Quien lo recibe:** descomprime el zip (por ejemplo, en el Escritorio) y sigue la **instalación paso a paso** de abajo dentro de la carpeta `FiaFacil`. Usa **su propia contraseña de PostgreSQL** en su `.env`. Toma unos 20 minutos. Después puede practicar con [docs/TUTORIAL_JUEGOS_AB.md](docs/TUTORIAL_JUEGOS_AB.md).
 
